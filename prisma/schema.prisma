@@ -1,0 +1,473 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  organization_id   String       @id
+  organization_code String       @unique
+  organization_name String
+  organization_type String
+  status            String
+  default_language  String?
+  default_timezone  String?
+  created_at        DateTime
+  updated_at        DateTime
+  users_default     User[]
+  memberships       Membership[]
+  assistantInstances AssistantInstance[]
+  conversations     Conversation[]
+  connectorAccounts ConnectorAccount[]
+  notificationPreferences NotificationPreference[]
+  notificationMessages NotificationMessage[]
+  taskSnapshots      TaskSnapshot[]
+  briefingSnapshots  BriefingSnapshot[]
+}
+
+model User {
+  user_id                  String              @id
+  user_code                String              @unique
+  display_name             String
+  email                    String?
+  phone                    String?
+  preferred_language       String?
+  timezone                 String?
+  status                   String
+  default_organization_id  String?
+  created_at               DateTime
+  updated_at               DateTime
+  last_login_at            DateTime?
+  defaultOrganization      Organization?       @relation(fields: [default_organization_id], references: [organization_id])
+  memberships              Membership[]
+  oauthIdentities          OAuthIdentity[]
+  assistantInstances       AssistantInstance[]
+  conversations            Conversation[]
+  memories                 Memory[]
+  connectorAccounts        ConnectorAccount[]
+  notificationPreferences  NotificationPreference[]
+  notificationMessages     NotificationMessage[]
+  taskSnapshots            TaskSnapshot[]
+  briefingSnapshots        BriefingSnapshot[]
+  sessions                 UserSession[]
+}
+
+model Membership {
+  membership_id     String       @id
+  organization_id   String
+  user_id           String
+  membership_status String
+  is_primary        Boolean      @default(false)
+  joined_at         DateTime
+  ended_at          DateTime?
+  organization      Organization @relation(fields: [organization_id], references: [organization_id])
+  user              User         @relation(fields: [user_id], references: [user_id])
+}
+
+model OAuthIdentity {
+  oauth_identity_id      String   @id
+  user_id                String
+  provider               String
+  provider_subject       String
+  provider_email         String?
+  provider_tenant_id     String?
+  access_scope_snapshot  String?
+  linked_at              DateTime
+  last_login_at          DateTime?
+  status                 String
+  user                   User     @relation(fields: [user_id], references: [user_id])
+
+  @@unique([provider, provider_subject])
+}
+
+model AssistantDefinition {
+  assistant_definition_id String              @id
+  assistant_code          String              @unique
+  assistant_name          String
+  assistant_description   String?
+  work_type               String
+  capability_level        String
+  status                  String
+  default_visibility      String?
+  created_at              DateTime
+  updated_at              DateTime
+  versions                AssistantVersion[]
+  instances               AssistantInstance[]
+}
+
+model AssistantVersion {
+  assistant_version_id    String              @id
+  assistant_definition_id String
+  version_number          String
+  version_label           String?
+  status                  String
+  system_prompt_ref       String?
+  developer_prompt_ref    String?
+  model_policy_id         String?
+  memory_policy_id        String?
+  tool_policy_id          String?
+  output_policy_id        String?
+  approval_policy_id      String?
+  pricing_version_id      String?
+  effective_from          DateTime?
+  effective_to            DateTime?
+  created_at              DateTime
+  created_by              String?
+  definition              AssistantDefinition @relation(fields: [assistant_definition_id], references: [assistant_definition_id])
+  instances               AssistantInstance[]
+}
+
+model AssistantInstance {
+  assistant_instance_id   String              @id
+  assistant_definition_id String
+  assistant_version_id    String
+  user_id                 String
+  organization_id         String
+  instance_name           String?
+  instance_status         String
+  activated_at            DateTime?
+  deactivated_at          DateTime?
+  last_used_at            DateTime?
+  subscription_id         String?
+  approval_status         String
+  approved_by             String?
+  approved_at             DateTime?
+  definition              AssistantDefinition @relation(fields: [assistant_definition_id], references: [assistant_definition_id])
+  version                 AssistantVersion    @relation(fields: [assistant_version_id], references: [assistant_version_id])
+  user                    User                @relation(fields: [user_id], references: [user_id])
+  organization            Organization        @relation(fields: [organization_id], references: [organization_id])
+  conversations           Conversation[]
+  memories                Memory[]
+  taskSnapshots           TaskSnapshot[]
+  briefingSnapshots       BriefingSnapshot[]
+}
+
+model Conversation {
+  conversation_id         String              @id
+  assistant_instance_id   String
+  user_id                 String
+  organization_id         String
+  openai_conversation_id  String?
+  channel                 String?
+  conversation_status     String
+  started_at              DateTime
+  last_activity_at        DateTime?
+  archived_at             DateTime?
+  assistantInstance       AssistantInstance   @relation(fields: [assistant_instance_id], references: [assistant_instance_id])
+  user                    User                @relation(fields: [user_id], references: [user_id])
+  organization            Organization        @relation(fields: [organization_id], references: [organization_id])
+  events                  ConversationEvent[]
+  summaries               ConversationSummary[]
+  memories                Memory[]
+}
+
+model ConversationEvent {
+  conversation_event_id   String       @id
+  conversation_id         String
+  event_type              String
+  event_sequence          Int
+  actor_type              String
+  actor_id                String?
+  content_json            String?
+  tool_name               String?
+  policy_ref              String?
+  trace_id                String?
+  created_at              DateTime
+  conversation            Conversation @relation(fields: [conversation_id], references: [conversation_id])
+
+  @@unique([conversation_id, event_sequence])
+}
+
+model ConversationSummary {
+  conversation_summary_id String       @id
+  conversation_id         String
+  summary_type            String
+  summary_text            String?
+  summary_json            String?
+  source_event_start_seq  Int?
+  source_event_end_seq    Int?
+  generated_at            DateTime
+  generated_by_version_id String?
+  conversation            Conversation @relation(fields: [conversation_id], references: [conversation_id])
+}
+
+model Memory {
+  memory_id               String              @id
+  user_id                 String
+  organization_id         String
+  assistant_instance_id   String?
+  conversation_id         String?
+  memory_type             String
+  memory_scope            String
+  title                   String?
+  content_text            String?
+  content_json            String?
+  source_type             String?
+  confidence_score        Decimal?
+  status                  String
+  created_at              DateTime
+  updated_at              DateTime
+  expired_at              DateTime?
+  user                    User                @relation(fields: [user_id], references: [user_id])
+  assistantInstance       AssistantInstance?  @relation(fields: [assistant_instance_id], references: [assistant_instance_id])
+  conversation            Conversation?       @relation(fields: [conversation_id], references: [conversation_id])
+}
+
+model ConnectorAccount {
+  connector_account_id    String       @id
+  user_id                 String
+  organization_id         String
+  provider_type           String
+  external_account_id     String?
+  account_email           String?
+  account_display_name    String?
+  connection_status       String
+  linked_at               DateTime
+  last_verified_at        DateTime?
+  revoked_at              DateTime?
+  user                    User         @relation(fields: [user_id], references: [user_id])
+  organization            Organization @relation(fields: [organization_id], references: [organization_id])
+  tokenRef                ConnectorTokenRef?
+  syncStates              ConnectorSyncState[]
+  schedules               Schedule[]
+  jobs                    Job[]
+}
+
+model ConnectorTokenRef {
+  connector_token_ref_id  String           @id
+  connector_account_id    String           @unique
+  access_token            String?
+  refresh_token           String?
+  scope_snapshot          String?
+  expires_at              DateTime?
+  token_status            String
+  created_at              DateTime
+  updated_at              DateTime
+  connectorAccount        ConnectorAccount @relation(fields: [connector_account_id], references: [connector_account_id])
+}
+
+model ConnectorSyncState {
+  connector_sync_state_id String           @id
+  connector_account_id    String
+  sync_target             String
+  last_sync_at            DateTime?
+  last_success_at         DateTime?
+  last_sync_cursor        String?
+  last_sync_status        String?
+  last_error_message      String?
+  next_sync_at            DateTime?
+  connectorAccount        ConnectorAccount @relation(fields: [connector_account_id], references: [connector_account_id])
+}
+
+model NotificationChannel {
+  notification_channel_id String                   @id
+  channel_code            String                   @unique
+  channel_name            String
+  provider                String
+  channel_type            String
+  status                  String
+  preferences             NotificationPreference[]
+  messages                NotificationMessage[]
+}
+
+model NotificationPreference {
+  notification_preference_id String              @id
+  user_id                    String
+  organization_id            String
+  channel_id                 String
+  preference_status          String
+  is_default                 Boolean             @default(false)
+  quiet_hours_json           String?
+  allowed_message_types_json String?
+  daily_send_limit           Int?
+  priority_rule_json         String?
+  updated_at                 DateTime
+  user                       User                @relation(fields: [user_id], references: [user_id])
+  organization               Organization        @relation(fields: [organization_id], references: [organization_id])
+  channel                    NotificationChannel @relation(fields: [channel_id], references: [notification_channel_id])
+}
+
+model NotificationMessage {
+  notification_message_id String              @id
+  user_id                 String
+  organization_id         String
+  channel_id              String
+  assistant_instance_id   String?
+  job_id                  String?
+  message_type            String
+  message_subject         String?
+  message_body_ref        String?
+  delivery_status         String
+  provider_message_id     String?
+  sent_at                 DateTime?
+  delivered_at            DateTime?
+  failed_at               DateTime?
+  error_message           String?
+  user                    User                @relation(fields: [user_id], references: [user_id])
+  organization            Organization        @relation(fields: [organization_id], references: [organization_id])
+  channel                 NotificationChannel @relation(fields: [channel_id], references: [notification_channel_id])
+}
+
+model Plan {
+  plan_id                 String         @id
+  plan_code               String         @unique
+  plan_name               String
+  plan_type               String
+  target_scope            String
+  status                  String
+  default_pricing_version_id String?
+  subscriptions           Subscription[]
+}
+
+model Subscription {
+  subscription_id         String   @id
+  plan_id                 String
+  subscriber_type         String
+  subscriber_id           String
+  subscription_status     String
+  pricing_version_id      String?
+  started_at              DateTime
+  trial_ends_at           DateTime?
+  current_period_start    DateTime?
+  current_period_end      DateTime?
+  cancelled_at            DateTime?
+  created_at              DateTime?
+  plan                    Plan     @relation(fields: [plan_id], references: [plan_id])
+}
+
+model Policy {
+  policy_id               String   @id
+  policy_code             String   @unique
+  policy_name             String
+  policy_type             String
+  policy_scope            String
+  policy_content_json     String
+  status                  String
+  version                 String
+  created_at              DateTime?
+}
+
+model ApprovalRecord {
+  approval_record_id      String   @id
+  organization_id         String
+  request_type            String
+  request_target_type     String
+  request_target_id       String
+  requested_by            String
+  requested_at            DateTime
+  approval_status         String
+  approved_by             String?
+  approved_at             DateTime?
+  rejected_by             String?
+  rejected_at             DateTime?
+  reason                  String?
+  comments                String?
+}
+
+model AuditLog {
+  audit_log_id            String   @id
+  organization_id         String
+  user_id                 String?
+  actor_type              String
+  actor_id                String?
+  action_type             String
+  target_type             String?
+  target_id               String?
+  result_status           String
+  reason                  String?
+  trace_id                String?
+  metadata_json           String?
+  created_at              DateTime
+}
+
+model TaskSnapshot {
+  task_snapshot_id        String             @id
+  user_id                 String
+  organization_id         String
+  assistant_instance_id   String?
+  source_job_id           String?
+  snapshot_date           String
+  snapshot_type           String
+  content_json            String
+  generated_at            DateTime
+  user                    User               @relation(fields: [user_id], references: [user_id])
+  organization            Organization       @relation(fields: [organization_id], references: [organization_id])
+  assistantInstance       AssistantInstance? @relation(fields: [assistant_instance_id], references: [assistant_instance_id])
+
+  @@unique([user_id, organization_id, snapshot_date, snapshot_type])
+}
+
+model BriefingSnapshot {
+  briefing_snapshot_id    String             @id
+  user_id                 String
+  organization_id         String
+  assistant_instance_id   String?
+  source_job_id           String?
+  briefing_date           String
+  briefing_type           String
+  content_text            String?
+  content_json            String
+  generated_at            DateTime
+  user                    User               @relation(fields: [user_id], references: [user_id])
+  organization            Organization       @relation(fields: [organization_id], references: [organization_id])
+  assistantInstance       AssistantInstance? @relation(fields: [assistant_instance_id], references: [assistant_instance_id])
+
+  @@unique([user_id, organization_id, briefing_date, briefing_type])
+}
+
+model Schedule {
+  schedule_id             String           @id
+  user_id                 String
+  organization_id         String
+  assistant_instance_id   String?
+  connector_account_id    String?
+  schedule_type           String
+  schedule_name           String
+  timezone                String
+  cron_or_rule            String
+  is_enabled              Boolean          @default(true)
+  last_run_at             DateTime?
+  next_run_at             DateTime?
+  created_at              DateTime
+  connectorAccount        ConnectorAccount? @relation(fields: [connector_account_id], references: [connector_account_id])
+  jobs                    Job[]
+}
+
+model Job {
+  job_id                  String           @id
+  schedule_id             String?
+  connector_account_id    String?
+  job_type                String
+  job_status              String
+  trigger_type            String
+  assistant_instance_id   String?
+  user_id                 String
+  organization_id         String
+  input_payload_ref       String?
+  output_payload_ref      String?
+  started_at              DateTime?
+  finished_at             DateTime?
+  retry_count             Int              @default(0)
+  error_message           String?
+  schedule                Schedule?        @relation(fields: [schedule_id], references: [schedule_id])
+  connectorAccount        ConnectorAccount? @relation(fields: [connector_account_id], references: [connector_account_id])
+}
+
+model UserSession {
+  user_session_id         String   @id
+  session_token           String   @unique
+  user_id                 String
+  organization_id         String
+  session_status          String
+  created_at              DateTime
+  updated_at              DateTime
+  expires_at              DateTime
+  last_seen_at            DateTime?
+  user                    User     @relation(fields: [user_id], references: [user_id])
+
+  @@index([user_id, session_status])
+  @@index([session_token, session_status])
+}

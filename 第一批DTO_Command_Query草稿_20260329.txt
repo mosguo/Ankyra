@@ -1,0 +1,309 @@
+Ankyra 第一批 DTO / Command / Query 草稿
+日期：2026-03-29
+
+一、目的
+本文件用於定義 MVP 第一批 API 與 application service 所需 DTO、Command、Query 草稿，方便後續建立 type、schema 與 service 介面。
+
+二、DTO 類型
+1. AuthContextDto
+欄位：
+- user_id
+- display_name
+- email
+- current_organization
+- roles
+
+2. OrganizationDto
+欄位：
+- organization_id
+- organization_code
+- organization_name
+- organization_type
+- status
+
+3. AssistantCatalogItemDto
+欄位：
+- assistant_definition_id
+- assistant_code
+- assistant_name
+- work_type
+- capability_level
+- description
+- approval_required
+
+4. AssistantInstanceDto
+欄位：
+- assistant_instance_id
+- assistant_definition_id
+- assistant_version_id
+- instance_name
+- instance_status
+- approval_status
+
+5. ConversationDto
+欄位：
+- conversation_id
+- assistant_instance_id
+- conversation_status
+- channel
+- last_activity_at
+
+6. ConversationEventDto
+欄位：
+- conversation_event_id
+- event_type
+- actor_type
+- content
+- created_at
+
+7. TaskSnapshotDto
+欄位：
+- task_snapshot_id
+- snapshot_date
+- snapshot_type
+- tasks
+
+8. BriefingSnapshotDto
+欄位：
+- briefing_snapshot_id
+- briefing_date
+- briefing_type
+- sections
+
+9. ConnectorAccountDto
+欄位：
+- connector_account_id
+- provider_type
+- account_email
+- connection_status
+- last_verified_at
+
+10. NotificationPreferenceDto
+欄位：
+- notification_preference_id
+- channel_code
+- preference_status
+- is_default
+- quiet_hours
+- allowed_message_types
+- daily_send_limit
+
+11. ApprovalRecordDto
+欄位：
+- approval_record_id
+- request_type
+- request_target_type
+- request_target_id
+- approval_status
+- requested_at
+
+12. AuditLogDto
+欄位：
+- audit_log_id
+- action_type
+- target_type
+- target_id
+- result_status
+- created_at
+
+三、Command 類型
+1. BeginOAuthLoginCommand
+欄位：
+- provider
+- redirect_uri
+
+2. HandleOAuthCallbackCommand
+欄位：
+- provider
+- code
+- state
+
+3. SwitchOrganizationCommand
+欄位：
+- user_id
+- organization_id
+
+4. CreateAssistantInstanceCommand
+欄位：
+- user_id
+- organization_id
+- assistant_definition_id
+- instance_name
+
+5. UpgradeAssistantInstanceCommand
+欄位：
+- assistant_instance_id
+- target_assistant_definition_id
+- operator_id
+- reason
+
+6. SuspendAssistantInstanceCommand
+欄位：
+- assistant_instance_id
+- operator_id
+
+7. CreateConversationCommand
+欄位：
+- user_id
+- assistant_instance_id
+- channel
+
+8. SendConversationMessageCommand
+欄位：
+- conversation_id
+- user_id
+- content
+
+9. BeginConnectorAuthorizationCommand
+欄位：
+- user_id
+- organization_id
+- provider
+
+10. RevokeConnectorCommand
+欄位：
+- connector_account_id
+- operator_id
+
+11. UpdateNotificationPreferenceCommand
+欄位：
+- notification_preference_id
+- preference_status
+- is_default
+- quiet_hours_json
+- allowed_message_types_json
+- daily_send_limit
+
+12. ApproveRequestCommand
+欄位：
+- approval_record_id
+- operator_id
+- comments
+
+13. RejectRequestCommand
+欄位：
+- approval_record_id
+- operator_id
+- reason
+- comments
+
+四、Query 類型
+1. GetCurrentAuthContextQuery
+欄位：
+- session_id 或 access_token context
+
+2. ListAssistantCatalogQuery
+欄位：
+- user_id
+- organization_id
+- work_type
+- capability_level
+
+3. GetAssistantDefinitionQuery
+欄位：
+- assistant_definition_id
+
+4. ListConversationsQuery
+欄位：
+- user_id
+- assistant_instance_id
+- status
+
+5. GetConversationDetailQuery
+欄位：
+- conversation_id
+- user_id
+
+6. ListMemoriesQuery
+欄位：
+- user_id
+- memory_type
+
+7. GetTodayTaskSnapshotQuery
+欄位：
+- user_id
+- organization_id
+
+8. GetTodayBriefingSnapshotQuery
+欄位：
+- user_id
+- organization_id
+
+9. ListConnectorAccountsQuery
+欄位：
+- user_id
+- organization_id
+
+10. ListNotificationPreferencesQuery
+欄位：
+- user_id
+
+11. ListApprovalsQuery
+欄位：
+- organization_id
+- approval_status
+
+12. ListAuditLogsQuery
+欄位：
+- organization_id
+- action_type
+- target_type
+- actor_id
+
+13. GetAdminSummaryQuery
+欄位：
+- organization_id
+
+五、AIRuntime 內部 DTO
+1. AssistantRuntimeProfile
+欄位：
+- assistant_instance_id
+- assistant_version_id
+- work_type
+- capability_level
+- prompt_refs
+- policy_refs
+- tool_policies
+
+2. ConversationRuntimeContext
+欄位：
+- conversation
+- recent_events
+- summaries
+- user_profile
+- organization_profile
+
+3. MemoryCandidateDto
+欄位：
+- memory_id
+- memory_type
+- title
+- content
+- confidence_score
+
+4. ToolExecutionRequestDto
+欄位：
+- tool_code
+- operation
+- payload
+
+5. ToolExecutionResultDto
+欄位：
+- tool_code
+- result_status
+- payload
+- error_message
+
+6. PolicyDecisionDto
+欄位：
+- decision
+- policy_id
+- reason
+- metadata
+
+六、實作建議
+- DTO 用於 API response 與 service output
+- Command 用於寫操作
+- Query 用於讀操作
+- AI runtime DTO 與外部 API DTO 分離
+- Controller 接 request 後先轉成 command / query，再交給 service

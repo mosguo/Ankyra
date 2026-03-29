@@ -1,0 +1,603 @@
+Ankyra 第一批資料表 ERD 草案
+日期：2026-03-29
+
+一、目的
+本文件用於定義 MVP 第一批核心資料表、主要欄位與關聯方向，作為後續 migration、ORM schema 與 API 實作依據。
+
+二、ERD 主線
+1. 組織與身分主線
+- organizations -> memberships -> users -> oauth_identities
+
+2. 助理主線
+- assistant_definitions -> assistant_versions -> assistant_instances
+
+3. 對話主線
+- assistant_instances -> conversations -> conversation_events -> conversation_summaries
+
+4. 外部整合主線
+- users / organizations -> connector_accounts -> connector_sync_states
+
+5. 產出與通知主線
+- jobs -> task_snapshots / briefing_snapshots -> notification_messages
+
+6. 治理主線
+- approval_records
+- audit_logs
+- policies
+- tool_policies
+
+三、資料表草案
+1. organizations
+主鍵：
+- organization_id
+
+主要欄位：
+- organization_code
+- organization_name
+- organization_type
+- status
+- default_language
+- default_timezone
+- created_at
+- updated_at
+
+關聯：
+- 1:N memberships
+- 1:N assistant_instances
+- 1:N conversations
+- 1:N connector_accounts
+
+2. users
+主鍵：
+- user_id
+
+主要欄位：
+- user_code
+- display_name
+- email
+- phone
+- preferred_language
+- timezone
+- status
+- default_organization_id
+- created_at
+- updated_at
+- last_login_at
+
+關聯：
+- 1:N memberships
+- 1:N oauth_identities
+- 1:N assistant_instances
+- 1:N conversations
+- 1:N task_snapshots
+- 1:N briefing_snapshots
+- 1:N notification_preferences
+
+3. memberships
+主鍵：
+- membership_id
+
+主要欄位：
+- organization_id
+- user_id
+- membership_status
+- is_primary
+- joined_at
+- ended_at
+
+關聯：
+- N:1 organizations
+- N:1 users
+
+4. oauth_identities
+主鍵：
+- oauth_identity_id
+
+主要欄位：
+- user_id
+- provider
+- provider_subject
+- provider_email
+- provider_tenant_id
+- access_scope_snapshot
+- linked_at
+- last_login_at
+- status
+
+關聯：
+- N:1 users
+
+唯一鍵建議：
+- provider + provider_subject
+
+5. assistant_definitions
+主鍵：
+- assistant_definition_id
+
+主要欄位：
+- assistant_code
+- assistant_name
+- assistant_description
+- work_type
+- capability_level
+- status
+- default_visibility
+- created_at
+- updated_at
+
+關聯：
+- 1:N assistant_versions
+- 1:N assistant_instances
+
+6. assistant_versions
+主鍵：
+- assistant_version_id
+
+主要欄位：
+- assistant_definition_id
+- version_number
+- version_label
+- status
+- system_prompt_ref
+- developer_prompt_ref
+- model_policy_id
+- memory_policy_id
+- tool_policy_id
+- output_policy_id
+- approval_policy_id
+- pricing_version_id
+- effective_from
+- effective_to
+- created_at
+- created_by
+
+關聯：
+- N:1 assistant_definitions
+- 1:N assistant_instances
+
+7. assistant_instances
+主鍵：
+- assistant_instance_id
+
+主要欄位：
+- assistant_definition_id
+- assistant_version_id
+- user_id
+- organization_id
+- instance_name
+- instance_status
+- activated_at
+- deactivated_at
+- last_used_at
+- subscription_id
+- approval_status
+- approved_by
+- approved_at
+
+關聯：
+- N:1 assistant_definitions
+- N:1 assistant_versions
+- N:1 users
+- N:1 organizations
+- 1:N conversations
+
+8. conversations
+主鍵：
+- conversation_id
+
+主要欄位：
+- assistant_instance_id
+- user_id
+- organization_id
+- openai_conversation_id
+- channel
+- conversation_status
+- started_at
+- last_activity_at
+- archived_at
+
+關聯：
+- N:1 assistant_instances
+- N:1 users
+- N:1 organizations
+- 1:N conversation_events
+- 1:N conversation_summaries
+
+9. conversation_events
+主鍵：
+- conversation_event_id
+
+主要欄位：
+- conversation_id
+- event_type
+- event_sequence
+- actor_type
+- actor_id
+- content_json
+- tool_name
+- policy_ref
+- trace_id
+- created_at
+
+關聯：
+- N:1 conversations
+
+唯一鍵建議：
+- conversation_id + event_sequence
+
+10. conversation_summaries
+主鍵：
+- conversation_summary_id
+
+主要欄位：
+- conversation_id
+- summary_type
+- summary_text
+- summary_json
+- source_event_start_seq
+- source_event_end_seq
+- generated_at
+- generated_by_version_id
+
+關聯：
+- N:1 conversations
+
+11. memories
+主鍵：
+- memory_id
+
+主要欄位：
+- user_id
+- organization_id
+- assistant_instance_id
+- conversation_id
+- memory_type
+- memory_scope
+- title
+- content_text
+- content_json
+- source_type
+- confidence_score
+- status
+- created_at
+- updated_at
+- expired_at
+
+關聯：
+- N:1 users
+- N:1 organizations
+- N:1 assistant_instances 可選
+- N:1 conversations 可選
+
+12. connector_accounts
+主鍵：
+- connector_account_id
+
+主要欄位：
+- user_id
+- organization_id
+- provider_type
+- external_account_id
+- account_email
+- account_display_name
+- connection_status
+- linked_at
+- last_verified_at
+- revoked_at
+
+關聯：
+- N:1 users
+- N:1 organizations
+- 1:N connector_sync_states
+
+13. connector_sync_states
+主鍵：
+- connector_sync_state_id
+
+主要欄位：
+- connector_account_id
+- sync_target
+- last_sync_at
+- last_success_at
+- last_sync_cursor
+- last_sync_status
+- last_error_message
+- next_sync_at
+
+關聯：
+- N:1 connector_accounts
+
+14. jobs
+主鍵：
+- job_id
+
+主要欄位：
+- schedule_id
+- job_type
+- job_status
+- trigger_type
+- assistant_instance_id
+- user_id
+- organization_id
+- input_payload_ref
+- output_payload_ref
+- started_at
+- finished_at
+- retry_count
+- error_message
+
+關聯：
+- N:1 assistant_instances 可選
+- N:1 users 可選
+- N:1 organizations 可選
+- 1:N task_snapshots
+- 1:N briefing_snapshots
+- 1:N notification_messages
+
+15. task_snapshots
+主鍵：
+- task_snapshot_id
+
+主要欄位：
+- user_id
+- organization_id
+- assistant_instance_id
+- source_job_id
+- snapshot_date
+- snapshot_type
+- content_json
+- generated_at
+
+關聯：
+- N:1 users
+- N:1 organizations
+- N:1 assistant_instances
+- N:1 jobs
+
+16. briefing_snapshots
+主鍵：
+- briefing_snapshot_id
+
+主要欄位：
+- user_id
+- organization_id
+- assistant_instance_id
+- source_job_id
+- briefing_date
+- briefing_type
+- content_text
+- content_json
+- generated_at
+
+關聯：
+- N:1 users
+- N:1 organizations
+- N:1 assistant_instances
+- N:1 jobs
+
+17. notification_channels
+主鍵：
+- notification_channel_id
+
+主要欄位：
+- channel_code
+- channel_name
+- provider
+- channel_type
+- status
+
+關聯：
+- 1:N notification_preferences
+- 1:N notification_messages
+
+18. notification_preferences
+主鍵：
+- notification_preference_id
+
+主要欄位：
+- user_id
+- organization_id
+- channel_id
+- preference_status
+- is_default
+- quiet_hours_json
+- allowed_message_types_json
+- daily_send_limit
+- priority_rule_json
+- updated_at
+
+關聯：
+- N:1 users
+- N:1 organizations
+- N:1 notification_channels
+
+19. notification_messages
+主鍵：
+- notification_message_id
+
+主要欄位：
+- user_id
+- organization_id
+- channel_id
+- assistant_instance_id
+- job_id
+- message_type
+- message_subject
+- message_body_ref
+- delivery_status
+- provider_message_id
+- sent_at
+- delivered_at
+- failed_at
+- error_message
+
+關聯：
+- N:1 users
+- N:1 organizations
+- N:1 notification_channels
+- N:1 assistant_instances 可選
+- N:1 jobs 可選
+
+20. policies
+主鍵：
+- policy_id
+
+主要欄位：
+- policy_code
+- policy_name
+- policy_type
+- policy_scope
+- policy_content_json
+- status
+- version
+- created_at
+
+21. tool_policies
+主鍵：
+- tool_policy_id
+
+主要欄位：
+- assistant_version_id
+- tool_code
+- access_mode
+- requires_approval
+- allowed_operations_json
+- status
+
+關聯：
+- N:1 assistant_versions
+
+22. approval_records
+主鍵：
+- approval_record_id
+
+主要欄位：
+- organization_id
+- request_type
+- request_target_type
+- request_target_id
+- requested_by
+- requested_at
+- approval_status
+- approved_by
+- approved_at
+- rejected_by
+- rejected_at
+- reason
+- comments
+
+23. audit_logs
+主鍵：
+- audit_log_id
+
+主要欄位：
+- organization_id
+- user_id
+- actor_type
+- actor_id
+- action_type
+- target_type
+- target_id
+- result_status
+- reason
+- trace_id
+- metadata_json
+- created_at
+
+24. plans
+主鍵：
+- plan_id
+
+主要欄位：
+- plan_code
+- plan_name
+- plan_type
+- target_scope
+- status
+- default_pricing_version_id
+- created_at
+- updated_at
+
+25. subscriptions
+主鍵：
+- subscription_id
+
+主要欄位：
+- plan_id
+- subscriber_type
+- subscriber_id
+- subscription_status
+- pricing_version_id
+- started_at
+- trial_ends_at
+- current_period_start
+- current_period_end
+- cancelled_at
+- created_at
+
+關聯：
+- N:1 plans
+
+26. usage_records
+主鍵：
+- usage_record_id
+
+主要欄位：
+- subscription_id
+- user_id
+- organization_id
+- assistant_instance_id
+- usage_type
+- usage_quantity
+- usage_unit
+- usage_period_date
+- source_ref_type
+- source_ref_id
+- recorded_at
+
+關聯：
+- N:1 subscriptions
+- N:1 users 可選
+- N:1 organizations 可選
+- N:1 assistant_instances 可選
+
+四、MVP 建議先實作的外鍵
+- memberships.organization_id -> organizations.organization_id
+- memberships.user_id -> users.user_id
+- oauth_identities.user_id -> users.user_id
+- assistant_versions.assistant_definition_id -> assistant_definitions.assistant_definition_id
+- assistant_instances.assistant_definition_id -> assistant_definitions.assistant_definition_id
+- assistant_instances.assistant_version_id -> assistant_versions.assistant_version_id
+- assistant_instances.user_id -> users.user_id
+- assistant_instances.organization_id -> organizations.organization_id
+- conversations.assistant_instance_id -> assistant_instances.assistant_instance_id
+- conversations.user_id -> users.user_id
+- conversations.organization_id -> organizations.organization_id
+- conversation_events.conversation_id -> conversations.conversation_id
+- conversation_summaries.conversation_id -> conversations.conversation_id
+- memories.user_id -> users.user_id
+- connector_accounts.user_id -> users.user_id
+- connector_sync_states.connector_account_id -> connector_accounts.connector_account_id
+- task_snapshots.source_job_id -> jobs.job_id
+- briefing_snapshots.source_job_id -> jobs.job_id
+- notification_preferences.channel_id -> notification_channels.notification_channel_id
+- notification_messages.channel_id -> notification_channels.notification_channel_id
+- tool_policies.assistant_version_id -> assistant_versions.assistant_version_id
+- subscriptions.plan_id -> plans.plan_id
+- usage_records.subscription_id -> subscriptions.subscription_id
+
+五、MVP 可延後實作的表
+- memory_embeddings
+- pricing_versions
+- subscription_items
+- billing_cycles
+- invoice_records
+- access_logs
+- policy_change_logs
+- retention_rules
+- retention_actions
+
+六、實作建議
+- 先建立 identity、assistant、conversation、connector、snapshot、notification、governance 這七條主線
+- migration 順序先從 owner table 開始，再到關聯表
+- 表結構先求穩定，不要一開始過度一般化

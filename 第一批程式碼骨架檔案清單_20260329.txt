@@ -1,0 +1,238 @@
+Ankyra 第一批程式碼骨架檔案清單
+日期：2026-03-29
+
+一、目的
+本文件列出 MVP 第一批建議建立的程式碼骨架檔案，作為初始化 repo 與程式專案時的實體檔案清單。
+
+二、apps/api
+1. apps/api/src/main.ts
+2. apps/api/src/app.module.ts
+
+3. apps/api/src/modules/identity/auth.controller.ts
+4. apps/api/src/modules/identity/identity.module.ts
+
+5. apps/api/src/modules/assistants/assistant-catalog.controller.ts
+6. apps/api/src/modules/assistants/assistant-instance.controller.ts
+7. apps/api/src/modules/assistants/assistants.module.ts
+
+8. apps/api/src/modules/conversations/conversation.controller.ts
+9. apps/api/src/modules/conversations/memory.controller.ts
+10. apps/api/src/modules/conversations/conversations.module.ts
+
+11. apps/api/src/modules/connectors/connector.controller.ts
+12. apps/api/src/modules/connectors/connectors.module.ts
+
+13. apps/api/src/modules/snapshots/snapshot.controller.ts
+14. apps/api/src/modules/snapshots/snapshots.module.ts
+
+15. apps/api/src/modules/notifications/notification.controller.ts
+16. apps/api/src/modules/notifications/notifications.module.ts
+
+17. apps/api/src/modules/governance/approval.controller.ts
+18. apps/api/src/modules/governance/audit.controller.ts
+19. apps/api/src/modules/governance/admin.controller.ts
+20. apps/api/src/modules/governance/governance.module.ts
+
+21. apps/api/src/modules/billing/billing.module.ts
+
+三、packages/domain
+1. packages/domain/src/organizations/organization.entity.ts
+2. packages/domain/src/users/user.entity.ts
+3. packages/domain/src/memberships/membership.entity.ts
+4. packages/domain/src/oauth/oauth-identity.entity.ts
+
+5. packages/domain/src/assistants/assistant-definition.entity.ts
+6. packages/domain/src/assistants/assistant-version.entity.ts
+7. packages/domain/src/assistants/assistant-instance.entity.ts
+
+8. packages/domain/src/conversations/conversation.entity.ts
+9. packages/domain/src/conversations/conversation-event.entity.ts
+10. packages/domain/src/conversations/conversation-summary.entity.ts
+
+11. packages/domain/src/memories/memory.entity.ts
+
+12. packages/domain/src/connectors/connector-account.entity.ts
+13. packages/domain/src/connectors/connector-sync-state.entity.ts
+
+14. packages/domain/src/jobs/job.entity.ts
+15. packages/domain/src/snapshots/task-snapshot.entity.ts
+16. packages/domain/src/snapshots/briefing-snapshot.entity.ts
+
+17. packages/domain/src/notifications/notification-channel.entity.ts
+18. packages/domain/src/notifications/notification-preference.entity.ts
+19. packages/domain/src/notifications/notification-message.entity.ts
+
+20. packages/domain/src/governance/policy.entity.ts
+21. packages/domain/src/governance/tool-policy.entity.ts
+22. packages/domain/src/governance/approval-record.entity.ts
+23. packages/domain/src/governance/audit-log.entity.ts
+
+24. packages/domain/src/billing/plan.entity.ts
+25. packages/domain/src/billing/subscription.entity.ts
+26. packages/domain/src/billing/usage-record.entity.ts
+
+四、packages/application
+1. packages/application/src/identity/auth.service.ts
+2. packages/application/src/identity/user.service.ts
+3. packages/application/src/identity/membership.service.ts
+
+4. packages/application/src/assistants/assistant-catalog.service.ts
+5. packages/application/src/assistants/assistant-instance.service.ts
+6. packages/application/src/assistants/assistant-approval.service.ts
+
+7. packages/application/src/conversations/conversation.service.ts
+8. packages/application/src/conversations/conversation-event.service.ts
+9. packages/application/src/conversations/conversation-summary.service.ts
+
+10. packages/application/src/ai/ai-runtime.service.ts
+11. packages/application/src/ai/prompt.service.ts
+12. packages/application/src/ai/memory-runtime.service.ts
+13. packages/application/src/ai/tool-runtime.service.ts
+14. packages/application/src/ai/policy-runtime.service.ts
+
+15. packages/application/src/connectors/connector.service.ts
+16. packages/application/src/connectors/connector-sync.service.ts
+17. packages/application/src/connectors/mail-ingestion.service.ts
+
+18. packages/application/src/snapshots/task-snapshot.service.ts
+19. packages/application/src/snapshots/briefing-snapshot.service.ts
+
+20. packages/application/src/notifications/notification-preference.service.ts
+21. packages/application/src/notifications/notification-dispatch.service.ts
+
+22. packages/application/src/governance/approval.service.ts
+23. packages/application/src/governance/audit.service.ts
+24. packages/application/src/governance/policy.service.ts
+
+25. packages/application/src/billing/plan.service.ts
+26. packages/application/src/billing/subscription.service.ts
+27. packages/application/src/billing/usage.service.ts
+
+五、packages/application interfaces
+1. packages/application/src/contracts/dto/
+2. packages/application/src/contracts/commands/
+3. packages/application/src/contracts/queries/
+4. packages/application/src/contracts/results/
+
+建議至少建立：
+- auth-context.dto.ts
+- assistant-catalog-item.dto.ts
+- assistant-instance.dto.ts
+- conversation.dto.ts
+- conversation-event.dto.ts
+- task-snapshot.dto.ts
+- briefing-snapshot.dto.ts
+- connector-account.dto.ts
+- notification-preference.dto.ts
+- approval-record.dto.ts
+- audit-log.dto.ts
+
+以及：
+- begin-oauth-login.command.ts
+- handle-oauth-callback.command.ts
+- create-assistant-instance.command.ts
+- create-conversation.command.ts
+- send-conversation-message.command.ts
+- begin-connector-authorization.command.ts
+- update-notification-preference.command.ts
+- approve-request.command.ts
+- reject-request.command.ts
+
+六、packages/infrastructure
+1. packages/infrastructure/src/db/
+2. packages/infrastructure/src/repositories/
+3. packages/infrastructure/src/orm/
+
+建議至少建立：
+- organization.repository.impl.ts
+- user.repository.impl.ts
+- membership.repository.impl.ts
+- oauth-identity.repository.impl.ts
+- assistant-definition.repository.impl.ts
+- assistant-version.repository.impl.ts
+- assistant-instance.repository.impl.ts
+- conversation.repository.impl.ts
+- conversation-event.repository.impl.ts
+- conversation-summary.repository.impl.ts
+- memory.repository.impl.ts
+- connector-account.repository.impl.ts
+- connector-sync-state.repository.impl.ts
+- job.repository.impl.ts
+- task-snapshot.repository.impl.ts
+- briefing-snapshot.repository.impl.ts
+- notification-channel.repository.impl.ts
+- notification-preference.repository.impl.ts
+- notification-message.repository.impl.ts
+- policy.repository.impl.ts
+- tool-policy.repository.impl.ts
+- approval-record.repository.impl.ts
+- audit-log.repository.impl.ts
+- plan.repository.impl.ts
+- subscription.repository.impl.ts
+- usage-record.repository.impl.ts
+
+七、packages/ai-core
+1. packages/ai-core/src/orchestration/assistant-turn.orchestrator.ts
+2. packages/ai-core/src/context/context-builder.ts
+3. packages/ai-core/src/prompts/prompt-loader.ts
+4. packages/ai-core/src/policies/policy-evaluator.ts
+5. packages/ai-core/src/memory/memory-selector.ts
+6. packages/ai-core/src/tools/tool-selector.ts
+7. packages/ai-core/src/openai/openai-runtime.adapter.ts
+
+八、packages/connectors
+1. packages/connectors/src/gmail/gmail.adapter.ts
+2. packages/connectors/src/outlook/outlook.adapter.ts
+3. packages/connectors/src/notifications/line.sender.ts
+4. packages/connectors/src/notifications/telegram.sender.ts
+
+九、database
+1. database/migrations/0001_init_identity.sql
+2. database/migrations/0002_init_assistants.sql
+3. database/migrations/0003_init_conversations.sql
+4. database/migrations/0004_init_memories.sql
+5. database/migrations/0005_init_connectors.sql
+6. database/migrations/0006_init_jobs_and_snapshots.sql
+7. database/migrations/0007_init_notifications.sql
+8. database/migrations/0008_init_governance.sql
+9. database/migrations/0009_init_billing_min.sql
+
+10. database/seeds/base.seed.json
+11. database/seeds/demo.seed.json
+
+十、apps/web
+1. apps/web/src/app/login/page.tsx
+2. apps/web/src/app/dashboard/page.tsx
+3. apps/web/src/app/assistants/page.tsx
+4. apps/web/src/app/assistants/[id]/page.tsx
+5. apps/web/src/app/my-assistants/page.tsx
+6. apps/web/src/app/conversations/page.tsx
+7. apps/web/src/app/conversations/[id]/page.tsx
+8. apps/web/src/app/tasks/today/page.tsx
+9. apps/web/src/app/briefings/today/page.tsx
+10. apps/web/src/app/connectors/page.tsx
+11. apps/web/src/app/notifications/page.tsx
+12. apps/web/src/app/admin/page.tsx
+13. apps/web/src/app/admin/approvals/page.tsx
+14. apps/web/src/app/admin/audit/page.tsx
+
+十一、MVP 先做的骨架檔
+第一優先：
+- main.ts / app.module.ts
+- AuthController
+- AssistantCatalogController
+- AssistantInstanceController
+- ConversationController
+- ConnectorController
+- SnapshotController
+- NotificationController
+- ApprovalController
+- AuditController
+- 對應 service 檔
+- 對應 repository impl 檔
+- migration 檔
+
+十二、實作建議
+- 先建空檔與 interface，不急著一次填滿
+- 先讓檔案結構反映模組邊界
+- provider adapter 先保留 Gmail / Outlook、LINE / Telegram 雙骨架，實作時擇一啟用

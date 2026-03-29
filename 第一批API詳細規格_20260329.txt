@@ -1,0 +1,376 @@
+Ankyra 第一批 API 詳細規格
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批 API 的用途、方法、路徑、輸入輸出重點與權限方向，作為後續後端實作與前端串接依據。
+
+二、Auth API
+1. POST /auth/oauth/login
+用途：
+- 啟動 OAuth2 登入流程
+
+Request Body：
+- provider
+- redirect_uri
+
+Response：
+- authorization_url
+
+權限：
+- 公開
+
+2. GET /auth/oauth/callback
+用途：
+- OAuth callback 後建立或綁定使用者
+
+Query：
+- provider
+- code
+- state
+
+Response：
+- access_token 或 session 建立結果
+- user_profile
+- organizations
+
+權限：
+- 公開 callback
+
+3. GET /auth/me
+用途：
+- 取得當前登入者資料
+
+Response：
+- user
+- current_organization
+- roles
+- available_assistants_summary
+
+4. POST /auth/switch-organization
+用途：
+- 切換目前操作租戶
+
+Request Body：
+- organization_id
+
+Response：
+- current_organization
+- roles
+
+三、Assistant API
+1. GET /assistants/catalog
+用途：
+- 取得可見助理目錄
+
+Query：
+- work_type 可選
+- capability_level 可選
+
+Response：
+- assistants[]
+
+欄位建議：
+- assistant_definition_id
+- assistant_code
+- assistant_name
+- work_type
+- capability_level
+- description
+- approval_required
+
+2. GET /assistants/catalog/{id}
+用途：
+- 取得單一助理詳情
+
+Response：
+- definition
+- current_active_version_summary
+- pricing_summary
+- capability_summary
+
+3. POST /assistant-instances
+用途：
+- 申請或建立助理實例
+
+Request Body：
+- assistant_definition_id
+- organization_id
+- instance_name 可選
+
+Response：
+- assistant_instance
+- approval_status
+
+4. POST /assistant-instances/{id}/upgrade
+用途：
+- 升級助理 instance 到其他版本或等級
+
+Request Body：
+- target_assistant_definition_id 或 target_version_id
+- reason 可選
+
+Response：
+- assistant_instance
+- approval_status
+
+5. POST /assistant-instances/{id}/suspend
+用途：
+- 暫停助理 instance
+
+Response：
+- instance_status
+
+四、Conversation API
+1. GET /conversations
+用途：
+- 取得當前使用者的 conversation 列表
+
+Query：
+- assistant_instance_id 可選
+- status 可選
+
+Response：
+- conversations[]
+
+2. POST /conversations
+用途：
+- 建立新 conversation
+
+Request Body：
+- assistant_instance_id
+- channel 可選
+
+Response：
+- conversation
+
+3. GET /conversations/{id}
+用途：
+- 取得單一 conversation 詳情
+
+Response：
+- conversation
+- events[]
+- summaries[]
+
+4. POST /conversations/{id}/messages
+用途：
+- 送出一則 user message 並觸發 AI 回應
+
+Request Body：
+- content
+- attachments 可選
+
+Response：
+- user_event
+- assistant_event
+- tool_events 可選
+- summary_updated 可選
+
+五、Memory / Snapshot API
+1. GET /memories
+用途：
+- 取得使用者可檢視的 memory 摘要
+
+Query：
+- memory_type 可選
+
+Response：
+- memories[]
+
+2. GET /task-snapshots/today
+用途：
+- 取得今日待辦快照
+
+Response：
+- snapshot_date
+- tasks[]
+- source_summary
+
+3. GET /briefing-snapshots/today
+用途：
+- 取得今日晨會摘要
+
+Response：
+- briefing_date
+- sections[]
+- key_items[]
+
+六、Connector API
+1. GET /connectors
+用途：
+- 取得目前可用與已連接的 connector 狀態
+
+Response：
+- providers[]
+- connections[]
+
+2. POST /connectors/{provider}/authorize
+用途：
+- 啟動外部帳號授權流程
+
+Path：
+- provider 例如 gmail / outlook_mail
+
+Response：
+- authorization_url
+
+3. GET /connectors/{provider}/callback
+用途：
+- 處理外部授權 callback
+
+Response：
+- connector_account
+- connection_status
+
+4. DELETE /connectors/{id}
+用途：
+- 移除外部帳號連線
+
+Response：
+- success
+
+七、Notification API
+1. GET /notification-preferences
+用途：
+- 取得使用者通知偏好
+
+Response：
+- preferences[]
+
+2. PUT /notification-preferences/{id}
+用途：
+- 更新通知偏好
+
+Request Body：
+- preference_status
+- is_default
+- quiet_hours_json
+- allowed_message_types_json
+- daily_send_limit
+
+Response：
+- notification_preference
+
+3. GET /notification-messages
+用途：
+- 取得通知發送紀錄
+
+Query：
+- status 可選
+- message_type 可選
+
+Response：
+- messages[]
+
+八、Approval / Audit API
+1. GET /approvals
+用途：
+- 取得當前待審批項目
+
+Query：
+- approval_status 可選
+
+Response：
+- approvals[]
+
+2. POST /approvals/{id}/approve
+用途：
+- 核准審批項目
+
+Request Body：
+- comments 可選
+
+Response：
+- approval_record
+
+3. POST /approvals/{id}/reject
+用途：
+- 拒絕審批項目
+
+Request Body：
+- reason
+- comments 可選
+
+Response：
+- approval_record
+
+4. GET /audit-logs
+用途：
+- 取得 audit 記錄
+
+Query：
+- action_type 可選
+- target_type 可選
+- actor_id 可選
+
+Response：
+- audit_logs[]
+
+九、管理端 API
+1. GET /admin/users
+用途：
+- 取得租戶使用者列表
+
+2. GET /admin/assistant-instances
+用途：
+- 取得助理開通狀態
+
+3. GET /admin/connectors
+用途：
+- 取得租戶 connector 狀態
+
+4. GET /admin/summary
+用途：
+- 取得租戶管理首頁摘要
+
+十、共通回應原則
+1. Response 結構建議
+- success
+- data
+- error 可選
+- meta 可選
+
+2. 錯誤碼建議
+- UNAUTHORIZED
+- FORBIDDEN
+- VALIDATION_ERROR
+- APPROVAL_REQUIRED
+- PROVIDER_ERROR
+- POLICY_BLOCKED
+- NOT_FOUND
+- INTERNAL_ERROR
+
+3. 權限原則
+- 一般使用者只能操作自己的資源
+- 租戶管理者僅能操作本租戶資源
+- 高風險操作若未審批，回傳 APPROVAL_REQUIRED
+
+十一、MVP API 優先順序
+第一優先：
+- /auth/oauth/login
+- /auth/oauth/callback
+- /auth/me
+- /assistants/catalog
+- /assistant-instances
+- /conversations
+- /conversations/{id}/messages
+
+第二優先：
+- /connectors/{provider}/authorize
+- /connectors/{provider}/callback
+- /task-snapshots/today
+- /briefing-snapshots/today
+- /notification-preferences
+
+第三優先：
+- /approvals
+- /approvals/{id}/approve
+- /approvals/{id}/reject
+- /audit-logs
+- /admin/summary
+
+十二、實作建議
+- API 先求穩定，不先追求過度細分
+- 前端回應使用 DTO，不直接暴露資料表欄位
+- conversation message API 要保留未來 tool calling 與 streaming 擴充空間
+- connector callback、approval、audit 要從第一版就做可追蹤

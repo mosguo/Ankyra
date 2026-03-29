@@ -1,0 +1,173 @@
+Ankyra 第一批 Repository Interface 稿
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批 repository 介面草稿，作為資料存取層與 service implementation 的依賴界面。
+
+二、Identity Repositories
+1. OrganizationRepository
+介面建議：
+- findById(organizationId: string)
+- findByCode(code: string)
+- save(organization)
+
+2. UserRepository
+介面建議：
+- findById(userId: string)
+- findByEmail(email: string)
+- save(user)
+- updateLastLogin(userId: string, at: Date)
+
+3. MembershipRepository
+介面建議：
+- findByUserId(userId: string)
+- findActiveByUserAndOrganization(userId: string, organizationId: string)
+- save(membership)
+
+4. OAuthIdentityRepository
+介面建議：
+- findByProviderSubject(provider: string, providerSubject: string)
+- findByUserId(userId: string)
+- save(oauthIdentity)
+
+三、Assistant Repositories
+1. AssistantDefinitionRepository
+介面建議：
+- findById(assistantDefinitionId: string)
+- listVisibleByOrganization(organizationId: string, filters)
+- save(definition)
+
+2. AssistantVersionRepository
+介面建議：
+- findById(assistantVersionId: string)
+- findActiveByDefinitionId(assistantDefinitionId: string)
+- save(version)
+
+3. AssistantInstanceRepository
+介面建議：
+- findById(assistantInstanceId: string)
+- listByUser(userId: string)
+- save(instance)
+- updateStatus(assistantInstanceId: string, status: string)
+
+四、Conversation Repositories
+1. ConversationRepository
+介面建議：
+- findById(conversationId: string)
+- listByUser(userId: string, filters)
+- save(conversation)
+- updateActivity(conversationId: string, at: Date)
+
+2. ConversationEventRepository
+介面建議：
+- listByConversationId(conversationId: string)
+- getNextSequence(conversationId: string)
+- save(event)
+
+3. ConversationSummaryRepository
+介面建議：
+- findLatestByConversationId(conversationId: string)
+- save(summary)
+
+4. MemoryRepository
+介面建議：
+- listByUser(userId: string, filters)
+- listCandidatesByUser(userId: string, context)
+- save(memory)
+
+五、Connector Repositories
+1. ConnectorAccountRepository
+介面建議：
+- findById(connectorAccountId: string)
+- listByUserAndOrganization(userId: string, organizationId: string)
+- findActiveByProvider(userId: string, organizationId: string, providerType: string)
+- save(account)
+- updateStatus(connectorAccountId: string, status: string)
+
+2. ConnectorSyncStateRepository
+介面建議：
+- findByConnectorAccountId(connectorAccountId: string)
+- save(syncState)
+- updateSyncState(connectorAccountId: string, stateInput)
+
+六、Job / Snapshot Repositories
+1. JobRepository
+介面建議：
+- findById(jobId: string)
+- save(job)
+- updateStatus(jobId: string, status: string, result)
+
+2. TaskSnapshotRepository
+介面建議：
+- findTodayByUser(userId: string, organizationId: string)
+- save(snapshot)
+
+3. BriefingSnapshotRepository
+介面建議：
+- findTodayByUser(userId: string, organizationId: string)
+- save(snapshot)
+
+七、Notification Repositories
+1. NotificationChannelRepository
+介面建議：
+- findByCode(channelCode: string)
+- listActive()
+
+2. NotificationPreferenceRepository
+介面建議：
+- listByUser(userId: string)
+- findById(preferenceId: string)
+- save(preference)
+
+3. NotificationMessageRepository
+介面建議：
+- findById(notificationMessageId: string)
+- listByUser(userId: string, filters)
+- save(message)
+- updateDeliveryStatus(notificationMessageId: string, status: string, metadata)
+
+八、Governance Repositories
+1. PolicyRepository
+介面建議：
+- findById(policyId: string)
+- listEffectivePolicies(targetContext)
+- save(policy)
+
+2. ToolPolicyRepository
+介面建議：
+- listByAssistantVersionId(assistantVersionId: string)
+- save(toolPolicy)
+
+3. ApprovalRecordRepository
+介面建議：
+- findById(approvalRecordId: string)
+- listByOrganization(organizationId: string, filters)
+- save(approvalRecord)
+- updateStatus(approvalRecordId: string, status: string, metadata)
+
+4. AuditLogRepository
+介面建議：
+- listByOrganization(organizationId: string, filters)
+- save(auditLog)
+
+九、Billing Repositories
+1. PlanRepository
+介面建議：
+- listActive(scope: string)
+- findById(planId: string)
+
+2. SubscriptionRepository
+介面建議：
+- findActiveBySubscriber(subscriberType: string, subscriberId: string)
+- save(subscription)
+
+3. UsageRecordRepository
+介面建議：
+- save(usageRecord)
+- listBySubscription(subscriptionId: string, period)
+
+十、實作建議
+- repository 介面放在 packages/domain 或 packages/application
+- ORM implementation 放在 packages/infrastructure
+- repository 返回 domain object 或 persistence model mapping 結果
+- 複雜 query 可額外拆 read repository

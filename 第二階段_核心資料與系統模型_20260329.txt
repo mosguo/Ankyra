@@ -1,0 +1,148 @@
+Ankyra 第二階段工作分析
+主階段名稱：核心資料與系統模型
+日期：2026-03-29
+
+一、第二階段目的
+第二階段的目標，是把第一階段已確認的產品定位、角色治理、助理商品化、AI 治理與文件規則，轉換成正式的系統資料模型與介面邊界。
+
+這一階段關注的不是功能畫面，而是：
+- 系統裡有哪些核心實體
+- 這些實體彼此如何關聯
+- 哪些資料屬於執行資料
+- 哪些資料屬於治理資料
+- 哪些資料可以流向 AI 或外部服務
+
+二、第二階段八組主題
+1. 核心實體與關聯
+2. 使用者／租戶／身分模型
+3. 助理／版本／實例模型
+4. conversation／memory／tool／policy 模型
+5. 通知／排程／外部整合模型
+6. 計費／方案／使用量模型
+7. 稽核／日誌／治理模型
+8. API 契約與資料邊界
+
+三、第二階段重點摘要
+1. 核心實體與關聯
+- 系統骨架主線建議為：
+  - Organization -> User -> AssistantInstance -> Conversation -> ConversationEvent
+- 助理主線建議為：
+  - AssistantDefinition -> AssistantVersion -> AssistantInstance
+- 記憶主線建議為：
+  - User -> Memory
+- 工具主線建議為：
+  - User/Organization -> ToolConnection
+- 治理主線建議為：
+  - Policy / ApprovalRecord / AuditLog / SecurityEvent
+
+2. 使用者／租戶／身分模型
+- 使用 users 作為內部使用者主體
+- 使用 organizations 作為租戶主體
+- 使用 memberships 管理 user 與 organization 關係
+- 使用 oauth_identities 管理外部登入身分
+- 使用 roles 與 user_role_assignments 管理平台與租戶角色
+
+3. 助理／版本／實例模型
+- 助理三層固定為：
+  - assistant_definition
+  - assistant_version
+  - assistant_instance
+- 一個 assistant_definition 可視為一個二維度 SKU
+- assistant_version 承載 prompt、model、memory、tool、output、approval、pricing 規則
+- assistant_instance 承載使用者實際啟用與授權狀態
+
+4. conversation／memory／tool／policy 模型
+- conversation 採三層：
+  - conversations
+  - conversation_events
+  - conversation_summaries
+- memory 採：
+  - memories
+  - memory_embeddings
+- tool 採：
+  - tool_definitions
+  - tool_connections
+  - tool_policies
+  - tool_invocation_logs
+- policy 採：
+  - policies
+  - policy_bindings
+  - policy_decision_logs
+- 所有執行過程以 conversation_event 為主線串接
+
+5. 通知／排程／外部整合模型
+- 外部連線主線：
+  - connector_accounts
+  - connector_tokens_ref
+  - connector_sync_states
+- 排程執行主線：
+  - schedules
+  - jobs
+- 結果沉澱主線：
+  - task_snapshots
+  - briefing_snapshots
+- 通知主線：
+  - notification_channels
+  - notification_preferences
+  - notification_messages
+
+6. 計費／方案／使用量模型
+- 商業模型建議採：
+  - 方案
+  - 助理能力綁定
+  - 使用量追蹤
+- 主要實體建議為：
+  - plans
+  - plan_features
+  - subscriptions
+  - subscription_items
+  - pricing_versions
+  - usage_records
+  - billing_cycles
+  - invoice_records
+
+7. 稽核／日誌／治理模型
+- 正式稽核與一般存取記錄應分離
+- 主要實體建議為：
+  - audit_logs
+  - access_logs
+  - policy_change_logs
+  - approval_records
+  - security_events
+  - retention_rules
+  - retention_actions
+  - governance_reviews
+
+8. API 契約與資料邊界
+- 介面邊界分為：
+  - 前端 API
+  - 內部服務 API
+  - AI 執行邊界
+  - 外部整合邊界
+- Entity、DTO、ViewModel、EventPayload、AIContextPayload 應分離
+- OpenAI 僅接收經整理、授權、裁切後的執行上下文
+- 正式主資料保留於 Ankyra
+
+四、第二階段設計原則
+- 所有核心資料都要有 owner
+- 對話與記憶分離
+- 助理定義、版本、實例分離
+- 執行資料與治理資料分離
+- 外部識別與內部識別分離
+- 所有資料傳輸遵守最小必要原則
+- 外部整合資料先標準化，再進系統
+- 所有主動任務、通知與工具使用都要可追溯
+
+五、第二階段完成判準
+若要判定第二階段完成，至少需完成以下事項：
+- 已定義主要核心實體清單
+- 已定義主要實體關聯圖
+- 已定義 users、organizations、assistants、conversations、memories、tools、policies、notifications、billings、audits 等主模型
+- 已定義主要狀態模型
+- 已定義資料邊界與 DTO/事件分類原則
+- 已定義可送 OpenAI、需遮罩、不可送模型的資料分類
+
+六、第二階段建議下一步
+- 建立第二階段待確認清單
+- 逐組確認第二階段 8 組主題
+- 確認完成後進入第三階段「AI 核心運作與治理控制」

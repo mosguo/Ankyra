@@ -1,0 +1,43 @@
+Ankyra 第三階段待確認清單
+日期：2026-03-29
+對應文件：
+- Requestments_20260338.txt
+- 第三階段_AI核心運作與治理控制_20260329.txt
+
+一、AI orchestration 核心流程
+- [x] 確認第三階段主流程為：執行入口、版本載入、上下文組裝、memory 召回、policy 套用、tool 判斷、模型回應、事件回寫
+
+二、Prompt 與模型治理
+- [x] 確認需管理 system prompt、developer prompt、prompt 版本、model policy、模型白名單與助理對應模型規則
+
+三、Conversation 運行控制
+- [x] 確認需定義 previous_response_id、OpenAI conversation object、summary 注入、上下文壓縮與歷史回放規則
+
+四、Memory 控制
+- [x] 確認需定義 memory 寫入、召回、合併、淘汰、有效期與高敏感記憶處理規則
+
+五、Tool calling 控制
+- [x] 確認需定義 tool 選擇、權限驗證、timeout、retry、結果標準化與 failure fallback 規則
+
+六、Policy 執行引擎
+- [x] 確認需定義可用資料、可用工具、可輸出內容、需審批情境與高風險阻擋規則
+
+七、AI 模擬與驗證
+- [x] 確認需建立標準測試場景、摘要樣本、prompt regression、tool 模擬與高風險案例測試
+
+八、AI 分析與調整
+- [x] 確認需追蹤摘要正確率、待辦命中率、記憶命中率、採納率、成本趨勢與工具成功率
+
+九、AI 監控與異常處理
+- [x] 確認需監控 latency、error rate、token 使用量、成本異常、policy violation、tool failure 與 degraded mode
+
+十、建議確認順序
+1. AI orchestration 核心流程
+2. Prompt 與模型治理
+3. Conversation 運行控制
+4. Memory 控制
+5. Tool calling 控制
+6. Policy 執行引擎
+7. AI 模擬與驗證
+8. AI 分析與調整
+9. AI 監控與異常處理

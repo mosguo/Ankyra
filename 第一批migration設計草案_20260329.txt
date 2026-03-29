@@ -1,0 +1,166 @@
+Ankyra 第一批 Migration 設計草案
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批資料表 migration 拆分順序，降低外鍵依賴混亂並方便逐步落地。
+
+二、Migration 拆分原則
+1. 先建立 owner table，再建立依附表
+2. 先建立核心主線，再建立輔助主線
+3. 先做 MVP 必需表，延後高複雜度表
+4. migration 名稱與範圍要清楚，避免一支腳本塞太多責任
+
+三、建議 Migration 順序
+0001_init_identity
+範圍：
+- organizations
+- users
+- memberships
+- oauth_identities
+
+原因：
+- 所有資料 owner 都依賴這組
+
+0002_init_assistants
+範圍：
+- assistant_definitions
+- assistant_versions
+- assistant_instances
+
+原因：
+- 對話與工作主體建立在助理實例上
+
+0003_init_conversations
+範圍：
+- conversations
+- conversation_events
+- conversation_summaries
+
+原因：
+- 先完成最小對話閉環
+
+0004_init_memories
+範圍：
+- memories
+
+原因：
+- MVP 先做最小版，不先做 memory_embeddings
+
+0005_init_connectors
+範圍：
+- connector_accounts
+- connector_sync_states
+
+原因：
+- 先做單一 provider read-only 整合
+
+0006_init_jobs_and_snapshots
+範圍：
+- jobs
+- task_snapshots
+- briefing_snapshots
+
+原因：
+- 支撐今日待辦與晨會摘要
+
+0007_init_notifications
+範圍：
+- notification_channels
+- notification_preferences
+- notification_messages
+
+原因：
+- 支撐單一通路通知 MVP
+
+0008_init_governance
+範圍：
+- policies
+- tool_policies
+- approval_records
+- audit_logs
+
+原因：
+- 建立最小治理閉環
+
+0009_init_billing_min
+範圍：
+- plans
+- subscriptions
+- usage_records
+
+原因：
+- MVP 先有最小方案與使用量記錄
+
+四、每支 Migration 重點
+0001_init_identity
+- organizations 先建
+- users 建立後再建 memberships
+- oauth_identities 建唯一鍵 provider + provider_subject
+
+0002_init_assistants
+- assistant_versions 外鍵到 assistant_definitions
+- assistant_instances 外鍵到 users、organizations、assistant_definitions、assistant_versions
+
+0003_init_conversations
+- conversations 掛 assistant_instance_id、user_id、organization_id
+- conversation_events 建 sequence 唯一性
+- summaries 可先不做複雜索引
+
+0004_init_memories
+- 先做最小欄位
+- assistant_instance_id、conversation_id 可允許 null
+
+0005_init_connectors
+- connector_accounts 掛 user_id、organization_id
+- connector_sync_states 掛 connector_account_id
+
+0006_init_jobs_and_snapshots
+- jobs 作為背景工作主表
+- snapshot 都掛 source_job_id
+
+0007_init_notifications
+- notification_channels 可先 seed 一筆或兩筆
+- preference 與 message 均掛 channel_id
+
+0008_init_governance
+- policies 與 tool_policies 分離
+- approval_records 與 audit_logs 均保留 metadata / comments 欄位
+
+0009_init_billing_min
+- plans 先做基本方案
+- subscriptions 支援 user / organization
+- usage_records 先做分析用途，不先做複雜對帳
+
+五、建議 seed 項目
+1. organizations 測試租戶
+2. roles 若未來獨立建表
+3. assistant_definitions 初始助理
+- 郵件整理初階
+- 今日待辦初階
+- 晨會摘要初階
+
+4. assistant_versions 初始版本 v1
+5. notification_channels
+- line
+- telegram
+
+6. plans
+- trial
+- standard
+
+六、MVP 延後 Migration
+- memory_embeddings
+- pricing_versions
+- subscription_items
+- billing_cycles
+- invoice_records
+- access_logs
+- policy_change_logs
+- retention_rules
+- retention_actions
+
+七、實作建議
+- 每支 migration 附簡短 schema note
+- 先以可讀性優先
+- 外鍵命名規則統一
+- index 先放查詢主路徑欄位

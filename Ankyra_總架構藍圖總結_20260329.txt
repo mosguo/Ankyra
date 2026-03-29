@@ -1,0 +1,152 @@
+Ankyra 總架構藍圖總結
+日期：2026-03-29
+
+一、專案定位
+Ankyra 定位為面向工作場景的多用戶 AI 助理平台。
+平台核心價值不是單次聊天，而是：
+- 多用戶與多助理運作
+- 長期 conversation 與 memory 沉澱
+- 外部信箱與工具整合
+- 主動整理待辦、晨會摘要與提醒
+- 將公司價值保留在自有 conversation ledger、memory 與分析系統中
+
+二、五大主階段總表
+第一階段：產品與治理定義
+- 產品定位與目標客群
+- 使用者、角色與治理邊界
+- 助理商品化與二維度規則
+- AI 治理原則與管理責任
+- 文件、審查與需求變更規則
+
+第二階段：核心資料與系統模型
+- 核心實體與關聯
+- 使用者／租戶／身分模型
+- 助理／版本／實例模型
+- conversation／memory／tool／policy 模型
+- 通知／排程／外部整合模型
+- 計費／方案／使用量模型
+- 稽核／日誌／治理模型
+- API 契約與資料邊界
+
+第三階段：AI 核心運作與治理控制
+- AI orchestration 核心流程
+- Prompt 與模型治理
+- Conversation 運行控制
+- Memory 控制
+- Tool calling 控制
+- Policy 執行引擎
+- AI 模擬與驗證
+- AI 分析與調整
+- AI 監控與異常處理
+
+第四階段：業務功能、外部整合與使用介面
+- 使用者登入與帳號進入流程
+- 助理申請、開通、升級與停用流程
+- Conversation 與助理互動介面
+- Memory、待辦與摘要檢視介面
+- 外部帳號授權與連結介面
+- 外部資料整合流程與呈現
+- 通知通路設定與發送流程
+- 管理後台與租戶管理介面
+- 審批、稽核與治理操作介面
+- 使用者方案、訂閱與計費介面
+
+第五階段：營運、分析、上線與持續優化
+- 營運指標與分析體系
+- AI 成效分析與模型優化
+- 營運後台報表與觀測介面
+- 監控、告警與異常處理
+- 測試、驗收與上線前放行
+- 部署、環境與 CI/CD
+- 資料保護、備份與復原
+- 效能、擴充與可靠性
+- 資安、合規與正式治理
+- 持續優化與版本演進
+
+三、系統核心主線
+1. 組織與使用者主線
+- Organization -> User -> Membership -> OAuthIdentity
+
+2. 助理產品主線
+- AssistantDefinition -> AssistantVersion -> AssistantInstance
+
+3. 對話主線
+- AssistantInstance -> Conversation -> ConversationEvent -> ConversationSummary
+
+4. 記憶主線
+- User -> Memory -> MemoryEmbedding
+
+5. 工具主線
+- User/Organization -> ToolConnection -> ToolPolicy -> ToolInvocationLog
+
+6. 排程與通知主線
+- Schedule -> Job -> TaskSnapshot / BriefingSnapshot -> NotificationMessage
+
+7. 治理主線
+- Policy -> ApprovalRecord / PolicyChangeLog / AuditLog / SecurityEvent / RetentionRule
+
+四、AI 執行主線
+- 收到任務
+- 載入 assistant instance / version
+- 載入 user / organization / policy / memory / tool 上下文
+- 組裝 AIContextPayload
+- 判斷可用資料與可用工具
+- 呼叫 OpenAI
+- 進入 tool calling 迴圈
+- 產出 assistant 回應
+- 回寫 conversation、summary、memory、snapshot、audit、usage、monitoring
+
+五、架構分層
+1. 應用主資料層
+- 使用者、助理、conversation ledger、memory、工具授權、通知、計費、稽核
+
+2. AI 執行狀態層
+- OpenAI Responses / Conversations API 執行狀態
+
+3. 分析與知識層
+- 待辦快照、摘要快照、使用成效、營運報表、AI 分析與治理分析
+
+六、MVP 最小閉環
+閉環 1
+- OAuth2 登入
+- 助理申請
+- 對話持久化
+
+閉環 2
+- Gmail 或 Outlook 整合
+- 今日待辦整理
+- 晨會摘要生成
+
+閉環 3
+- LINE 或 Telegram 通知
+- 每日提醒與晨會摘要推送
+
+七、MVP 第一版建議範圍
+- 支援 Google / Microsoft / WeChat / Twitter OAuth2，架構保留擴充
+- 助理主力類型：
+  - 郵件整理
+  - 今日待辦
+  - 晨會摘要
+  - 會議整理
+  - 專案追蹤
+- 能力等級：
+  - 初階
+  - 進階
+  - 專業
+- 外部整合建議先做 Gmail 或 Outlook 擇一
+- 通知建議先做 LINE 或 Telegram 擇一
+
+八、主要原則
+- OpenAI conversation 不是唯一真相
+- 重要長期資料保留在 Ankyra
+- 助理版本不覆蓋，只新增
+- conversation 與 memory 分離
+- tool 與 policy 先判定再執行
+- 審批、稽核、retention 要從第一版就預留
+
+九、後續實作建議
+- 優先開始 MVP 實作規劃
+- 先定第一批資料表
+- 再定第一批 API
+- 再定第一批 repo 目錄
+- 再拆第一批工作項目與人力分工

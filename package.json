@@ -1,0 +1,59 @@
+{
+  "name": "ankyra",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "nest start api --watch",
+    "dev:worker": "ts-node -r tsconfig-paths/register apps/worker/src/main.ts",
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "dev:all": "concurrently -n api,worker,web -c blue,magenta,green \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
+    "dev:stack": "npm run dev:setup && npm run dev:all",
+    "dev:local": "powershell -ExecutionPolicy Bypass -File scripts/dev-up.ps1",
+    "build:api": "nest build api",
+    "build:worker": "tsc -p apps/worker/tsconfig.app.json",
+    "build:web": "vite build --config apps/web/vite.config.ts",
+    "start:api": "node dist/apps/api/main.js",
+    "start:worker": "node dist/apps/worker/main.js",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "dev:setup": "npm run prisma:generate && npm run prisma:push && npm run seed:demo"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@prisma/client": "^6.0.0",
+    "bullmq": "^5.71.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "concurrently": "^9.2.1",
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.10.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tsconfig-paths": "^4.2.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "prisma": "^6.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.3"
+  }
+}

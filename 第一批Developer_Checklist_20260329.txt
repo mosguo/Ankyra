@@ -1,0 +1,158 @@
+Ankyra 第一批 Developer Checklist
+日期：2026-03-29
+
+一、目的
+本文件將 MVP 第一批開發任務進一步拆成可逐步執行的 developer checklist，方便每日推進、分工與追蹤。
+
+二、初始化 Checklist
+- [ ] 建立 backend framework 專案
+- [ ] 建立 `apps/api` 啟動骨架
+- [ ] 建立 `packages/application`、`packages/domain`、`packages/infrastructure`、`packages/ai-core`
+- [ ] 建立 `database/migrations`、`database/seeds`
+- [ ] 整理 docs 檔案到對應目錄
+- [ ] 建立 `.env.example`
+
+三、資料庫 Checklist
+1. Identity
+- [ ] 建立 organizations migration
+- [ ] 建立 users migration
+- [ ] 建立 memberships migration
+- [ ] 建立 oauth_identities migration
+- [ ] 驗證外鍵與索引
+
+2. Assistants
+- [ ] 建立 assistant_definitions migration
+- [ ] 建立 assistant_versions migration
+- [ ] 建立 assistant_instances migration
+- [ ] 驗證 definition / version / instance 關聯
+
+3. Conversations
+- [ ] 建立 conversations migration
+- [ ] 建立 conversation_events migration
+- [ ] 建立 conversation_summaries migration
+- [ ] 驗證 event sequence 唯一性
+
+4. Memories
+- [ ] 建立 memories migration
+
+5. Connectors
+- [ ] 建立 connector_accounts migration
+- [ ] 建立 connector_sync_states migration
+
+6. Jobs / Snapshots
+- [ ] 建立 jobs migration
+- [ ] 建立 task_snapshots migration
+- [ ] 建立 briefing_snapshots migration
+
+7. Notifications
+- [ ] 建立 notification_channels migration
+- [ ] 建立 notification_preferences migration
+- [ ] 建立 notification_messages migration
+
+8. Governance
+- [ ] 建立 policies migration
+- [ ] 建立 tool_policies migration
+- [ ] 建立 approval_records migration
+- [ ] 建立 audit_logs migration
+
+9. Billing
+- [ ] 建立 plans migration
+- [ ] 建立 subscriptions migration
+- [ ] 建立 usage_records migration
+
+四、Seed Checklist
+- [ ] 寫入 base seed
+- [ ] 寫入 demo seed
+- [ ] 驗證 assistant definitions 與 versions 可正確關聯
+- [ ] 驗證 notification channels 與 plans 可正確載入
+
+五、Identity / Auth Checklist
+- [ ] 建立 AuthController
+- [ ] 建立 AuthService
+- [ ] 建立 OAuth provider config
+- [ ] 實作 Google login flow
+- [ ] 實作 Microsoft login flow
+- [ ] 建立 `GET /auth/me`
+- [ ] 建立租戶切換流程
+
+六、Assistant Checklist
+- [ ] 建立 AssistantCatalogController
+- [ ] 建立 AssistantCatalogService
+- [ ] 建立 AssistantInstanceController
+- [ ] 建立 AssistantInstanceService
+- [ ] 建立 `GET /assistants/catalog`
+- [ ] 建立 `POST /assistant-instances`
+- [ ] 建立升級 / 停用流程最小版
+
+七、Conversation / AI Checklist
+- [ ] 建立 ConversationController
+- [ ] 建立 ConversationService
+- [ ] 建立 AIRuntimeService
+- [ ] 建立 `POST /conversations`
+- [ ] 建立 `POST /conversations/{id}/messages`
+- [ ] 寫入 conversation event ledger
+- [ ] 建立最小 summary 流程
+
+八、Connector Checklist
+- [ ] 建立 ConnectorController
+- [ ] 建立 ConnectorService
+- [ ] 選定 Gmail 或 Outlook
+- [ ] 完成 authorize callback 最小流程
+- [ ] 建立 connector account 保存邏輯
+- [ ] 建立單次同步流程
+
+九、Snapshot Checklist
+- [ ] 建立 TaskSnapshotService
+- [ ] 建立 BriefingSnapshotService
+- [ ] 將郵件資料轉成 task snapshot
+- [ ] 將 task snapshot 轉成 briefing snapshot
+- [ ] 建立 today APIs
+
+十、Notification Checklist
+- [ ] 建立 NotificationController
+- [ ] 建立 NotificationPreferenceService
+- [ ] 建立 NotificationDispatchService
+- [ ] 選定 LINE 或 Telegram
+- [ ] 建立單一通路 sender
+- [ ] 建立通知偏好 API
+
+十一、Governance Checklist
+- [ ] 建立 ApprovalController
+- [ ] 建立 AuditController
+- [ ] 建立 ApprovalService
+- [ ] 建立 AuditService
+- [ ] 將助理高風險申請接 approval
+- [ ] 將關鍵操作接 audit
+
+十二、前端對接 Checklist
+- [ ] Login Page 接 auth flow
+- [ ] Assistant Catalog Page 接 catalog API
+- [ ] Conversation Page 接 conversation API
+- [ ] Today Tasks Page 接 snapshot API
+- [ ] Today Briefing Page 接 briefing API
+- [ ] Connectors Page 接 connector API
+- [ ] Notification Preferences Page 接 notification API
+
+十三、驗收 Checklist
+- [ ] 使用者可登入
+- [ ] 使用者可建立助理 instance
+- [ ] 使用者可建立 conversation
+- [ ] AI 可回應
+- [ ] Connector 可授權與同步
+- [ ] 可產出 task snapshot
+- [ ] 可產出 briefing snapshot
+- [ ] 可推送 notification
+- [ ] 管理者可看 approval / audit
+
+十四、實作順序建議
+第一輪
+- 初始化、migration、seed、auth、assistant
+
+第二輪
+- conversation、ai runtime、summary
+
+第三輪
+- connector、task snapshot、briefing snapshot
+
+第四輪
+- notification、approval、audit、驗收

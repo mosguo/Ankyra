@@ -1,0 +1,220 @@
+openapi: 3.1.0
+info:
+  title: Ankyra MVP API
+  version: 0.1.0
+  description: First-pass OpenAPI draft for Ankyra MVP.
+servers:
+  - url: https://api.example.com
+paths:
+  /auth/oauth/login:
+    post:
+      summary: Start OAuth login flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, redirect_uri]
+              properties:
+                provider:
+                  type: string
+                  enum: [google, microsoft, wechat, twitter]
+                redirect_uri:
+                  type: string
+      responses:
+        '200':
+          description: OAuth login URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /auth/me:
+    get:
+      summary: Get current user profile
+      responses:
+        '200':
+          description: Current auth context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /assistants/catalog:
+    get:
+      summary: Get assistant catalog
+      parameters:
+        - in: query
+          name: work_type
+          schema:
+            type: string
+        - in: query
+          name: capability_level
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Assistant catalog list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /assistant-instances:
+    post:
+      summary: Create assistant instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assistant_definition_id, organization_id]
+              properties:
+                assistant_definition_id:
+                  type: string
+                organization_id:
+                  type: string
+                instance_name:
+                  type: string
+      responses:
+        '200':
+          description: Assistant instance created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /conversations:
+    get:
+      summary: List conversations
+      responses:
+        '200':
+          description: Conversation list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+    post:
+      summary: Create conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assistant_instance_id]
+              properties:
+                assistant_instance_id:
+                  type: string
+                channel:
+                  type: string
+      responses:
+        '200':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /conversations/{conversation_id}/messages:
+    post:
+      summary: Send a message and trigger AI response
+      parameters:
+        - in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+      responses:
+        '200':
+          description: AI response generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /task-snapshots/today:
+    get:
+      summary: Get today's task snapshot
+      responses:
+        '200':
+          description: Task snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /briefing-snapshots/today:
+    get:
+      summary: Get today's briefing snapshot
+      responses:
+        '200':
+          description: Briefing snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /connectors/{provider}/authorize:
+    post:
+      summary: Start connector authorization
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connector authorization URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /notification-preferences:
+    get:
+      summary: Get notification preferences
+      responses:
+        '200':
+          description: Notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /approvals:
+    get:
+      summary: List approvals
+      responses:
+        '200':
+          description: Approval list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+components:
+  schemas:
+    SuccessEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string

@@ -1,0 +1,306 @@
+{
+  "assistant_definitions": [
+    {
+      "assistant_definition_id": "asst_def_mail_basic",
+      "assistant_code": "MAIL_BASIC",
+      "assistant_name": "Mail Assistant Basic",
+      "assistant_description": "Summarize inbox and identify urgent replies.",
+      "work_type": "mail_management",
+      "capability_level": "basic",
+      "status": "active",
+      "default_visibility": "public",
+      "created_at": "2026-03-29T00:00:00Z",
+      "updated_at": "2026-03-29T00:00:00Z"
+    },
+    {
+      "assistant_definition_id": "asst_def_task_basic",
+      "assistant_code": "TASK_BASIC",
+      "assistant_name": "Task Assistant Basic",
+      "assistant_description": "Create a daily task list from work signals.",
+      "work_type": "daily_tasking",
+      "capability_level": "basic",
+      "status": "active",
+      "default_visibility": "public",
+      "created_at": "2026-03-29T00:00:00Z",
+      "updated_at": "2026-03-29T00:00:00Z"
+    },
+    {
+      "assistant_definition_id": "asst_def_briefing_basic",
+      "assistant_code": "BRIEFING_BASIC",
+      "assistant_name": "Briefing Assistant Basic",
+      "assistant_description": "Prepare a concise morning briefing.",
+      "work_type": "standup_briefing",
+      "capability_level": "basic",
+      "status": "active",
+      "default_visibility": "public",
+      "created_at": "2026-03-29T00:00:00Z",
+      "updated_at": "2026-03-29T00:00:00Z"
+    }
+  ],
+  "assistant_versions": [
+    {
+      "assistant_version_id": "asst_ver_mail_basic_v1",
+      "assistant_definition_id": "asst_def_mail_basic",
+      "version_number": "1",
+      "version_label": "v1.0",
+      "status": "active",
+      "system_prompt_ref": "seed/system/MAIL_BASIC.md",
+      "developer_prompt_ref": "seed/developer/MAIL_BASIC.md",
+      "created_at": "2026-03-29T00:00:00Z"
+    },
+    {
+      "assistant_version_id": "asst_ver_task_basic_v1",
+      "assistant_definition_id": "asst_def_task_basic",
+      "version_number": "1",
+      "version_label": "v1.0",
+      "status": "active",
+      "system_prompt_ref": "seed/system/TASK_BASIC.md",
+      "developer_prompt_ref": "seed/developer/TASK_BASIC.md",
+      "created_at": "2026-03-29T00:00:00Z"
+    },
+    {
+      "assistant_version_id": "asst_ver_brief_basic_v1",
+      "assistant_definition_id": "asst_def_briefing_basic",
+      "version_number": "1",
+      "version_label": "v1.0",
+      "status": "active",
+      "system_prompt_ref": "seed/system/BRIEFING_BASIC.md",
+      "developer_prompt_ref": "seed/developer/BRIEFING_BASIC.md",
+      "created_at": "2026-03-29T00:00:00Z"
+    }
+  ],
+  "assistant_instances": [
+    {
+      "assistant_instance_id": "ast_inst_demo_mail_001",
+      "assistant_definition_id": "asst_def_mail_basic",
+      "assistant_version_id": "asst_ver_mail_basic_v1",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "instance_name": "Demo Mail Assistant",
+      "instance_status": "active",
+      "approval_status": "approved",
+      "activated_at": "2026-03-29T00:00:00Z"
+    }
+  ],
+  "conversations": [
+    {
+      "conversation_id": "conv_demo_001",
+      "assistant_instance_id": "ast_inst_demo_mail_001",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "conversation_status": "active",
+      "channel": "web",
+      "started_at": "2026-03-29T08:30:00Z",
+      "last_activity_at": "2026-03-29T08:35:00Z"
+    }
+  ],
+  "conversation_events": [
+    {
+      "conversation_event_id": "conv_evt_demo_001",
+      "conversation_id": "conv_demo_001",
+      "event_type": "user_message",
+      "event_sequence": 1,
+      "actor_type": "user",
+      "content_json": "{\"text\":\"Please summarize today's priorities.\"}",
+      "created_at": "2026-03-29T08:30:00Z"
+    },
+    {
+      "conversation_event_id": "conv_evt_demo_002",
+      "conversation_id": "conv_demo_001",
+      "event_type": "assistant_message",
+      "event_sequence": 2,
+      "actor_type": "assistant",
+      "content_json": "{\"text\":\"Top priorities are inbox escalation response, standup blocker update, and afternoon sync prep.\"}",
+      "created_at": "2026-03-29T08:31:00Z"
+    }
+  ],
+  "connector_accounts": [
+    {
+      "connector_account_id": "connector-gmail-demo",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "provider_type": "gmail",
+      "external_account_id": "gmail-demo-account",
+      "account_email": "gmail.demo@ankyra.local",
+      "account_display_name": "Gmail Demo Account",
+      "connection_status": "active",
+      "linked_at": "2026-03-29T08:00:00Z",
+      "last_verified_at": "2026-03-29T08:00:00Z"
+    }
+  ],
+  "connector_sync_states": [
+    {
+      "connector_sync_state_id": "sync-connector-gmail-demo-mail",
+      "connector_account_id": "connector-gmail-demo",
+      "sync_target": "mail",
+      "last_sync_at": "2026-03-29T08:40:00Z",
+      "last_success_at": "2026-03-29T08:40:00Z",
+      "last_sync_cursor": "mail-cursor-demo",
+      "last_sync_status": "success",
+      "next_sync_at": "2026-03-29T09:10:00Z"
+    }
+  ],
+  "notification_channels": [
+    {
+      "notification_channel_id": "notif_line",
+      "channel_code": "line",
+      "channel_name": "LINE",
+      "provider": "line",
+      "channel_type": "messaging",
+      "status": "active"
+    },
+    {
+      "notification_channel_id": "notif_telegram",
+      "channel_code": "telegram",
+      "channel_name": "Telegram",
+      "provider": "telegram",
+      "channel_type": "messaging",
+      "status": "active"
+    }
+  ],
+  "notification_preferences": [
+    {
+      "notification_preference_id": "notif_pref_line_demo",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "channel_id": "notif_line",
+      "preference_status": "active",
+      "is_default": true,
+      "quiet_hours_json": "{\"start\":\"23:00\",\"end\":\"07:30\"}",
+      "allowed_message_types_json": "[\"daily_briefing\",\"task_reminder\"]",
+      "daily_send_limit": 5,
+      "updated_at": "2026-03-29T08:00:00Z"
+    }
+  ],
+  "notification_messages": [
+    {
+      "notification_message_id": "notif_msg_demo_001",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "channel_id": "notif_line",
+      "assistant_instance_id": "ast_inst_demo_mail_001",
+      "message_type": "daily_briefing",
+      "message_subject": "Morning briefing ready",
+      "message_body_ref": "{\"briefing\":\"ready\"}",
+      "delivery_status": "delivered",
+      "sent_at": "2026-03-29T08:42:00Z"
+    }
+  ],
+  "plans": [
+    {
+      "plan_id": "plan_trial",
+      "plan_code": "PLAN_TRIAL",
+      "plan_name": "Trial Plan",
+      "plan_type": "trial",
+      "target_scope": "organization",
+      "status": "active"
+    }
+  ],
+  "subscriptions": [
+    {
+      "subscription_id": "sub_demo_001",
+      "plan_id": "plan_trial",
+      "subscriber_type": "organization",
+      "subscriber_id": "org_demo_001",
+      "subscription_status": "active",
+      "started_at": "2026-03-29T00:00:00Z"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "pol_data_basic",
+      "policy_code": "POL_DATA_BASIC",
+      "policy_name": "Basic Data Policy",
+      "policy_type": "data_policy",
+      "policy_scope": "organization",
+      "policy_content_json": "{\"maskSensitive\":true}",
+      "status": "active",
+      "version": "1",
+      "created_at": "2026-03-29T00:00:00Z"
+    }
+  ],
+  "approval_records": [
+    {
+      "approval_record_id": "approval_demo_001",
+      "organization_id": "org_demo_001",
+      "request_type": "assistant_activation",
+      "request_target_type": "assistant_instance",
+      "request_target_id": "ast_inst_demo_mail_001",
+      "requested_by": "usr_user_001",
+      "requested_at": "2026-03-29T07:50:00Z",
+      "approval_status": "pending"
+    }
+  ],
+  "audit_logs": [
+    {
+      "audit_log_id": "audit_demo_001",
+      "organization_id": "org_demo_001",
+      "user_id": "usr_user_001",
+      "actor_type": "user",
+      "actor_id": "usr_user_001",
+      "action_type": "connector.sync.completed",
+      "target_type": "connector_account",
+      "target_id": "connector-gmail-demo",
+      "result_status": "success",
+      "created_at": "2026-03-29T08:40:00Z"
+    }
+  ],
+  "task_snapshots": [
+    {
+      "task_snapshot_id": "task_snapshot_demo_001",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "assistant_instance_id": "ast_inst_demo_mail_001",
+      "snapshot_date": "2026-03-29",
+      "snapshot_type": "daily_tasks",
+      "content_json": "[{\"priority\":\"P1\",\"title\":\"Reply to client escalation mail\",\"source\":\"gmail\",\"status\":\"open\"},{\"priority\":\"P1\",\"title\":\"Prepare standup blockers update\",\"source\":\"connector-sync\",\"status\":\"open\"}]",
+      "generated_at": "2026-03-29T08:40:00Z"
+    }
+  ],
+  "briefing_snapshots": [
+    {
+      "briefing_snapshot_id": "briefing_snapshot_demo_001",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "assistant_instance_id": "ast_inst_demo_mail_001",
+      "briefing_date": "2026-03-29",
+      "briefing_type": "morning_briefing",
+      "content_text": "Inbox summary prepared. Urgent replies detected.",
+      "content_json": "[{\"title\":\"Inbox summary\",\"items\":[\"Gmail sync fetched 12 items.\",\"Urgent replies detected.\"]},{\"title\":\"Today\",\"items\":[\"Reply to urgent mail threads.\",\"Prepare standup talking points.\"]}]",
+      "generated_at": "2026-03-29T08:40:00Z"
+    }
+  ],
+  "schedules": [
+    {
+      "schedule_id": "schedule_demo_001",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "connector_account_id": "connector-gmail-demo",
+      "schedule_type": "connector_sync",
+      "schedule_name": "Inbox sync every 30 min",
+      "timezone": "Asia/Taipei",
+      "cron_or_rule": "EVERY_30_MINUTES",
+      "is_enabled": true,
+      "last_run_at": "2026-03-29T08:40:00Z",
+      "next_run_at": "2026-03-29T09:10:00Z",
+      "created_at": "2026-03-29T08:00:00Z"
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": "job_demo_001",
+      "schedule_id": "schedule_demo_001",
+      "connector_account_id": "connector-gmail-demo",
+      "job_type": "connector_sync",
+      "job_status": "completed",
+      "trigger_type": "scheduled",
+      "user_id": "usr_user_001",
+      "organization_id": "org_demo_001",
+      "input_payload_ref": "{\"sync_target\":\"mail\"}",
+      "output_payload_ref": "{\"status\":\"completed\"}",
+      "started_at": "2026-03-29T08:40:00Z",
+      "finished_at": "2026-03-29T08:41:00Z",
+      "retry_count": 0
+    }
+  ]
+}

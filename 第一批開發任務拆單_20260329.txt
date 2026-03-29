@@ -1,0 +1,364 @@
+Ankyra 第一批開發任務拆單
+日期：2026-03-29
+
+一、目標
+本文件將 MVP 實作規劃轉成可直接分派、估時與排程的第一批開發任務。
+本輪以「可完成 MVP 最小閉環」為目標，不追求一次做完整商用版。
+
+二、MVP 實作收斂版
+本輪建議實作範圍：
+- OAuth2：Google、Microsoft
+- 助理類型：郵件整理、今日待辦、晨會摘要
+- 能力等級：初階、進階
+- 外部整合：Gmail 或 Outlook 擇一
+- 通知通路：LINE 或 Telegram 擇一
+- AI 能力：整理、摘要、分析、提醒
+- 治理能力：approval、audit、policy 最小版
+
+三、工作分組
+1. 架構與專案底座
+2. 身分與租戶
+3. 助理目錄與實例
+4. Conversation 與 AI orchestration
+5. Connector 與外部資料整合
+6. Snapshot 與通知
+7. Approval / Audit / Policy
+8. 管理端與基本前端頁面
+9. 測試與驗收
+
+四、第一批任務清單
+Task 01
+名稱：建立專案目錄與模組骨架
+目標：
+- 建立 docs、apps、packages、infra 基礎目錄
+- 預留 web、api、ai-core、connectors、domain 模組位置
+產出：
+- 專案基礎目錄結構
+- README 或啟動說明基礎
+依賴：無
+優先級：最高
+
+Task 02
+名稱：建立核心資料表第一版
+目標：
+- 建立 MVP 所需資料表草案與 migration 順序
+範圍：
+- users
+- organizations
+- memberships
+- oauth_identities
+- assistant_definitions
+- assistant_versions
+- assistant_instances
+- conversations
+- conversation_events
+- conversation_summaries
+- connector_accounts
+- connector_sync_states
+- task_snapshots
+- briefing_snapshots
+- notification_preferences
+- notification_messages
+- approval_records
+- audit_logs
+產出：
+- migration 設計清單
+- 資料表欄位定稿版
+依賴：Task 01
+優先級：最高
+
+Task 03
+名稱：建立 Auth 與租戶切換基礎 API
+目標：
+- 完成 Google / Microsoft OAuth2 登入架構
+- 完成 /auth/me 與租戶切換基本流程
+產出：
+- OAuth2 callback 流程
+- user / organization / membership 載入邏輯
+依賴：Task 02
+優先級：最高
+
+Task 04
+名稱：建立角色與權限最小判定機制
+目標：
+- 實作平台角色、租戶角色與最小權限判定
+- 支援一般使用者與租戶管理者最小流程
+產出：
+- RBAC 最小版
+- API 權限守衛
+依賴：Task 02、Task 03
+優先級：高
+
+Task 05
+名稱：建立助理目錄與助理實例模型
+目標：
+- 建立 assistant definition / version / instance 的資料流
+- 提供助理目錄與實例建立 API
+產出：
+- 助理目錄資料
+- 助理申請與 instance 建立流程
+依賴：Task 02、Task 03
+優先級：最高
+
+Task 06
+名稱：建立助理申請與審批最小流程
+目標：
+- 低風險助理可直接建立
+- 高風險助理進入 approval record
+產出：
+- 申請 API
+- approval 記錄
+- approve / reject 基礎 API
+依賴：Task 05
+優先級：高
+
+Task 07
+名稱：建立 conversation 主模型與事件帳本
+目標：
+- 可建立 conversation
+- 可寫入 user_message / assistant_message / tool_call / tool_result event
+產出：
+- conversations API
+- conversation_events 寫入流程
+依賴：Task 02、Task 05
+優先級：最高
+
+Task 08
+名稱：建立 OpenAI orchestration 最小流程
+目標：
+- 以 assistant instance 啟動一次 AI 回應流程
+- 能組裝基本 context 並回寫 conversation event
+產出：
+- AI runtime service
+- 基本 assistant response 流程
+依賴：Task 07
+優先級：最高
+
+Task 09
+名稱：建立 conversation summary 最小流程
+目標：
+- 針對長對話建立摘要
+- 支援後續 context reuse
+產出：
+- summary 寫入流程
+- conversation_summaries 基礎資料
+依賴：Task 08
+優先級：中高
+
+Task 10
+名稱：建立 memory 最小版
+目標：
+- 先做摘要型記憶與偏好型記憶
+- 不先做太複雜召回治理
+產出：
+- memories 基礎表與寫入規則
+- 最小召回流程
+依賴：Task 08、Task 09
+優先級：中高
+
+Task 11
+名稱：建立 connector 基礎架構
+目標：
+- 定義 connector account、token ref、sync state
+- 選定 Gmail 或 Outlook 其一做 MVP
+產出：
+- connector 基礎資料流
+- 授權與同步狀態保存
+依賴：Task 02、Task 03
+優先級：最高
+
+Task 12
+名稱：建立單一信箱 provider 整合
+目標：
+- 完成 Gmail 或 Outlook 讀取
+- 取得郵件整理所需最小欄位
+產出：
+- provider adapter
+- 郵件抓取與標準化流程
+依賴：Task 11
+優先級：最高
+
+Task 13
+名稱：建立今日待辦抽取流程
+目標：
+- 將信箱資料轉成 task snapshot
+產出：
+- task_snapshots 建立流程
+- 今日待辦 API
+依賴：Task 12、Task 08
+優先級：最高
+
+Task 14
+名稱：建立晨會摘要流程
+目標：
+- 將郵件與待辦轉成 briefing snapshot
+產出：
+- briefing_snapshots 建立流程
+- 晨會摘要 API
+依賴：Task 13
+優先級：最高
+
+Task 15
+名稱：建立通知偏好與通知發送最小流程
+目標：
+- 支援單一通路偏好設定
+- 支援每日摘要推送
+產出：
+- notification_preferences
+- notification_messages
+- 單一通路 sender
+依賴：Task 13、Task 14
+優先級：高
+
+Task 16
+名稱：建立 policy 最小版
+目標：
+- 控制可用資料、可用工具與可輸出內容的最小規則
+產出：
+- policy 基本配置
+- runtime policy check
+依賴：Task 08、Task 11
+優先級：高
+
+Task 17
+名稱：建立 audit 與 approval 最小版
+目標：
+- 關鍵操作可留 audit
+- 高風險助理申請可留 approval
+產出：
+- audit_logs
+- approval_records
+依賴：Task 06、Task 16
+優先級：高
+
+Task 18
+名稱：建立使用者前端 MVP 頁面
+目標：
+- 登入後首頁
+- 助理目錄
+- conversation 頁
+- 今日待辦頁
+- 晨會摘要頁
+- 外部帳號連結頁
+- 通知設定頁
+依賴：Task 03、Task 05、Task 07、Task 13、Task 14、Task 15
+優先級：最高
+
+Task 19
+名稱：建立租戶管理最小頁面
+目標：
+- 使用者列表
+- 助理開通狀態
+- approval 待辦
+- audit 基本查詢
+依賴：Task 06、Task 17
+優先級：中高
+
+Task 20
+名稱：建立測試與驗收清單
+目標：
+- 建立 MVP 驗收標準
+- 建立最小回歸測試場景
+產出：
+- 測試案例清單
+- UAT 驗收表
+依賴：Task 03 至 Task 19
+優先級：最高
+
+五、建議分工
+Tech Lead / Architect
+- Task 01
+- Task 02
+- Task 16
+- Task 20
+
+Backend A
+- Task 03
+- Task 04
+- Task 05
+- Task 06
+- Task 17
+
+Backend B
+- Task 07
+- Task 08
+- Task 09
+- Task 10
+
+Backend / Integration
+- Task 11
+- Task 12
+- Task 13
+- Task 14
+- Task 15
+
+Frontend
+- Task 18
+- Task 19
+
+QA / PM
+- Task 20
+
+六、建議執行順序
+第 1 週到第 2 週
+- Task 01
+- Task 02
+- Task 03
+- Task 04
+- Task 05
+
+第 3 週到第 4 週
+- Task 06
+- Task 07
+- Task 08
+- Task 11
+- Task 12
+
+第 5 週到第 6 週
+- Task 09
+- Task 10
+- Task 13
+- Task 14
+- Task 15
+
+第 7 週到第 8 週
+- Task 16
+- Task 17
+- Task 18
+- Task 19
+- Task 20
+
+七、MVP 最大風險
+1. OAuth provider 過多導致前期卡住
+建議：
+- MVP 實作先落 Google / Microsoft
+- WeChat / Twitter 保留 provider 架構與 interface
+
+2. Connector 失敗率與 token 管理
+建議：
+- 只選一個信箱 provider 先落地
+- 先做 read-only
+
+3. AI 輸出品質不穩
+建議：
+- 先鎖定固定輸出格式與固定場景
+
+4. Memory 過早複雜化
+建議：
+- 先做摘要型與偏好型 memory
+
+5. 範圍膨脹
+建議：
+- 助理控制在 3 種
+- 通知控制在 1 個通路
+- provider 控制在 1 個信箱整合
+
+八、第一批驗收條件
+- 使用者可完成 OAuth2 登入
+- 使用者可進入對應租戶
+- 使用者可申請至少一種助理
+- 使用者可建立 conversation 並獲得 AI 回應
+- 系統可讀取單一信箱 provider 並整理郵件
+- 系統可產出今日待辦與晨會摘要
+- 系統可透過單一通知通路推送結果
+- 管理者可查看 approval 與 audit 最小紀錄

@@ -1,0 +1,130 @@
+Ankyra Repo 目錄初始化清單與檔案骨架
+日期：2026-03-29
+
+一、目的
+本文件用於定義 Ankyra 專案第一版建議目錄結構，讓後續初始化 repo、放置文件、切模組與安排實作時有一致骨架。
+
+二、建議目錄結構
+/
+|- docs/
+|  |- requirements/
+|  |- plans/
+|  |- architecture/
+|  |- api/
+|  |- erd/
+|  |- operations/
+|
+|- apps/
+|  |- web/
+|  |- api/
+|
+|- packages/
+|  |- domain/
+|  |- application/
+|  |- infrastructure/
+|  |- ai-core/
+|  |- connectors/
+|  |- shared/
+|
+|- infra/
+|  |- docker/
+|  |- scripts/
+|  |- ci/
+|
+|- database/
+|  |- migrations/
+|  |- seeds/
+|  |- schema/
+|
+|- tests/
+|  |- unit/
+|  |- integration/
+|  |- e2e/
+|  |- ai-regression/
+|
+|- .env.example
+|- README.md
+
+三、各目錄用途
+1. docs/requirements
+- 放需求主文件、階段文件、待確認清單
+
+2. docs/plans
+- 放 Plan 類文件與里程碑追蹤
+
+3. docs/architecture
+- 放總架構藍圖、模組圖、流程圖
+
+4. docs/api
+- 放 API 規格、JSON 範例、版本規格
+
+5. docs/erd
+- 放 ERD 草案、資料表說明
+
+6. docs/operations
+- 放營運、監控、部署、治理、驗收文件
+
+7. apps/web
+- 前端 Web 應用
+
+8. apps/api
+- 後端主 API 應用
+
+9. packages/domain
+- Entity、Value Object、Domain Rule
+
+10. packages/application
+- Use Case、Service、Application Layer
+
+11. packages/infrastructure
+- DB、ORM、Repository、External Service Adapter
+
+12. packages/ai-core
+- orchestration、prompt、policy、memory runtime、tool runtime
+
+13. packages/connectors
+- Gmail、Outlook、Notification provider adapter
+
+14. packages/shared
+- 共用型別、常數、錯誤碼、DTO 工具
+
+15. infra
+- Docker、CI、部署腳本、環境設定
+
+16. database
+- migration、seed、schema 說明
+
+17. tests
+- 各類測試與 AI regression 樣本
+
+四、第一批建議建立的空檔案骨架
+1. README.md
+2. .env.example
+3. docs/requirements/Requestments_20260338.txt
+4. docs/architecture/Ankyra_總架構藍圖總結_20260329.txt
+5. docs/erd/第一批資料表_ERD草案_20260329.txt
+6. docs/api/第一批API詳細規格_20260329.txt
+7. docs/plans/Plan_20260329_L4.2.txt
+8. database/migrations/0001_init_identity.sql
+9. database/migrations/0002_init_assistants.sql
+10. database/migrations/0003_init_conversations.sql
+11. database/migrations/0004_init_connectors.sql
+12. database/migrations/0005_init_notifications.sql
+13. database/migrations/0006_init_governance.sql
+14. apps/api/README.md
+15. apps/web/README.md
+16. packages/ai-core/README.md
+17. packages/connectors/README.md
+
+五、建議初始化順序
+1. 建立 docs、database、apps、packages、tests
+2. 放入既有需求與規劃文件
+3. 建立 migration 骨架
+4. 建立 api 與 web 應用骨架
+5. 建立 ai-core 與 connectors 模組骨架
+
+六、實作建議
+- 文件先歸檔到 docs 下對應目錄
+- app 與 package 命名保持英文
+- 正式程式碼目錄避免中文命名
+- 文件可保留中文檔名與中文內容

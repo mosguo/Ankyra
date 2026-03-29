@@ -1,0 +1,205 @@
+Ankyra 第一批 Controller / Route 對應表
+日期：2026-03-29
+
+一、目的
+本文件將第一批 API 詳細規格對應到後端 controller 與 route，作為 API 層實作與模組切分依據。
+
+二、模組對應
+1. AuthController
+模組：
+- IdentityModule
+
+Routes：
+- POST /auth/oauth/login
+- GET /auth/oauth/callback
+- GET /auth/me
+- POST /auth/switch-organization
+
+2. AssistantCatalogController
+模組：
+- AssistantModule
+
+Routes：
+- GET /assistants/catalog
+- GET /assistants/catalog/{id}
+
+3. AssistantInstanceController
+模組：
+- AssistantModule
+
+Routes：
+- POST /assistant-instances
+- POST /assistant-instances/{id}/upgrade
+- POST /assistant-instances/{id}/suspend
+
+4. ConversationController
+模組：
+- ConversationModule
+- AICoreModule
+
+Routes：
+- GET /conversations
+- POST /conversations
+- GET /conversations/{id}
+- POST /conversations/{id}/messages
+
+5. MemoryController
+模組：
+- ConversationModule
+- AICoreModule
+
+Routes：
+- GET /memories
+
+6. SnapshotController
+模組：
+- SnapshotModule
+
+Routes：
+- GET /task-snapshots/today
+- GET /briefing-snapshots/today
+
+7. ConnectorController
+模組：
+- ConnectorModule
+
+Routes：
+- GET /connectors
+- POST /connectors/{provider}/authorize
+- GET /connectors/{provider}/callback
+- DELETE /connectors/{id}
+
+8. NotificationController
+模組：
+- NotificationModule
+
+Routes：
+- GET /notification-preferences
+- PUT /notification-preferences/{id}
+- GET /notification-messages
+
+9. ApprovalController
+模組：
+- GovernanceModule
+
+Routes：
+- GET /approvals
+- POST /approvals/{id}/approve
+- POST /approvals/{id}/reject
+
+10. AuditController
+模組：
+- GovernanceModule
+
+Routes：
+- GET /audit-logs
+
+11. AdminController
+模組：
+- GovernanceModule
+- AssistantModule
+- ConnectorModule
+- BillingModule
+
+Routes：
+- GET /admin/users
+- GET /admin/assistant-instances
+- GET /admin/connectors
+- GET /admin/summary
+
+三、建議 Controller 職責
+1. AuthController
+- 接收 OAuth2 provider 請求
+- 驗證 callback 參數
+- 呼叫 AuthService
+- 回傳 auth context DTO
+
+2. AssistantCatalogController
+- 處理 catalog 查詢與篩選條件
+- 回傳 assistant catalog DTO
+
+3. AssistantInstanceController
+- 建立 instance
+- 轉交升級 / 停用命令
+- 回傳 instance DTO 與 approval 狀態
+
+4. ConversationController
+- 管理 conversation CRUD 最小版
+- 轉交訊息給 AIRuntimeService
+- 回傳 message result DTO
+
+5. MemoryController
+- 僅提供 memory summary 查詢
+
+6. SnapshotController
+- 回傳今日 task / briefing snapshot
+
+7. ConnectorController
+- 啟動 authorize
+- 接 callback
+- 查詢與移除連線
+
+8. NotificationController
+- 管理通知偏好
+- 查詢通知紀錄
+
+9. ApprovalController
+- 列出待審批
+- 核准或拒絕
+
+10. AuditController
+- 提供查詢型 audit API
+
+11. AdminController
+- 提供租戶管理首頁摘要與列表
+
+四、建議 Route 分群
+公開路由
+- POST /auth/oauth/login
+- GET /auth/oauth/callback
+
+一般使用者路由
+- GET /auth/me
+- POST /auth/switch-organization
+- GET /assistants/catalog
+- POST /assistant-instances
+- GET /conversations
+- POST /conversations/{id}/messages
+- GET /task-snapshots/today
+- GET /briefing-snapshots/today
+- GET /connectors
+- POST /connectors/{provider}/authorize
+- GET /notification-preferences
+- PUT /notification-preferences/{id}
+
+審批者 / 管理者路由
+- GET /approvals
+- POST /approvals/{id}/approve
+- POST /approvals/{id}/reject
+- GET /audit-logs
+- GET /admin/users
+- GET /admin/assistant-instances
+- GET /admin/connectors
+- GET /admin/summary
+
+五、建議實作順序
+第一波 Controller
+- AuthController
+- AssistantCatalogController
+- AssistantInstanceController
+- ConversationController
+
+第二波 Controller
+- ConnectorController
+- SnapshotController
+- NotificationController
+
+第三波 Controller
+- ApprovalController
+- AuditController
+- AdminController
+
+六、實作建議
+- Controller 只做驗證、授權、DTO mapping、service 呼叫
+- 業務邏輯放 Application Service
+- AI orchestration 不放在 controller 內直接寫

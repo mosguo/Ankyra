@@ -1,0 +1,144 @@
+Ankyra 目前進度總表
+日期：2026-03-29
+
+一、正式需求與架構進度
+
+第一階段：產品與治理定義
+- 第1組：產品定位與目標客群，已完成
+- 第2組：使用者、角色與治理邊界，已完成
+- 第3組：助理商品化與二維度規則，已完成
+- 第4組：AI 治理原則與管理責任，已完成
+- 第5組：文件、審查與需求變更規則，已完成
+
+第二階段：核心資料與系統模型
+- 第1組：核心實體與關聯，已完成
+- 第2組：使用者／租戶／身分模型，已完成
+- 第3組：助理／版本／實例模型，已完成
+- 第4組：conversation／memory／tool／policy 模型，已完成
+- 第5組：通知／排程／外部整合模型，已完成
+- 第6組：計費／方案／使用量模型，已完成
+- 第7組：稽核／日誌／治理模型，已完成
+- 第8組：API 契約與資料邊界，已完成
+
+第三階段：AI 核心運作與治理控制
+- 第1組：AI orchestration 核心流程，已完成
+- 第2組：Prompt 與模型治理，已完成
+- 第3組：Conversation 運行控制，已完成
+- 第4組：Memory 控制，已完成
+- 第5組：Tool calling 控制，已完成
+- 第6組：Policy 執行引擎，已完成
+- 第7組：AI 模擬與驗證，已完成
+- 第8組：AI 分析與調整，已完成
+- 第9組：AI 監控與異常處理，已完成
+
+第四階段：業務功能、外部整合與使用介面
+- 第1組：使用者登入與帳號進入流程，已完成
+- 第2組：助理申請、開通、升級與停用流程，已完成
+- 第3組：Conversation 與助理互動介面，已完成
+- 第4組：Memory、待辦與摘要檢視介面，已完成
+- 第5組：外部帳號授權與連結介面，已完成
+- 第6組：外部資料整合流程與呈現，已完成
+- 第7組：通知通路設定與發送流程，已完成
+- 第8組：管理後台與租戶管理介面，已完成
+- 第9組：審批、稽核與治理操作介面，已完成
+- 第10組：使用者方案、訂閱與計費介面，已完成
+
+第五階段：營運、分析、上線與持續優化
+- 第1組：營運指標與分析體系，已完成
+- 第2組：AI 成效分析與模型優化，已完成
+- 第3組：營運後台報表與觀測介面，已完成
+- 第4組：監控、告警與異常處理，已完成
+- 第5組：測試、驗收與上線前放行，已完成
+- 第6組：部署、環境與 CI/CD，已完成
+- 第7組：資料保護、備份與復原，已完成
+- 第8組：效能、擴充與可靠性，已完成
+- 第9組：資安、合規與正式治理，已完成
+- 第10組：持續優化與版本演進，已完成
+
+二、實作準備進度
+
+- MVP 範圍與優先順序，已完成
+- 開發任務拆單，已完成
+- ERD 草案，已完成
+- API 詳細規格，已完成
+- OpenAPI 規格稿，已完成
+- SQL migration 草稿，已完成
+- Seed Data 草稿，已完成
+- Controller / Route 對應表，已完成
+- DTO / Command / Query 草稿，已完成
+- Application Service Interface 稿，已完成
+- Repository Interface 稿，已完成
+- Frontend Sitemap 與畫面骨架，已完成
+- 第一批程式碼骨架檔案清單，已完成
+- Backend Framework 建議與落地方式，已完成
+- Developer Checklist，已完成
+
+三、目前程式實作狀態
+
+已完成
+- 建立 NestJS 專案基本設定
+- 建立 Prisma schema 初版
+- 建立 AppModule 與主要 module 結構
+- 建立 Identity / Assistants / Conversations 主線 controller
+- 建立 Auth / Assistant / Conversation 主線 application service
+- 建立 User / AssistantDefinition / AssistantInstance / Conversation repository Prisma 底座
+- 建立 database migration 主線檔案
+- 建立 base seed 與 demo seed 初版
+
+進行中
+- 將主線服務由規格骨架轉成可編譯結構
+- 將 controller 補成 Nest decorators 與標準路由
+- 將 Prisma 與 repository 注入主線 module
+
+尚未完成
+- 安裝 npm 依賴
+- 執行 prisma generate
+- 驗證 TypeScript compile
+- 實作真正的 OAuth callback 邏輯
+- 實作 assistant catalog 真實查詢完整輸出
+- 實作 conversation event 寫入
+- 實作前端主畫面
+- 串接 Gmail / Outlook 真正授權流程
+
+四、目前所在位置
+
+- 正式需求架構進度：已完成第五階段第10組
+- 實作進度：進入實作啟動期
+- 技術底座進度：已完成後端初版骨架
+- 畫面進度：尚未進入前端主畫面實作
+
+五、主畫面可見時點判斷
+
+若以目前進度估計：
+- 完成 Auth 基本流程
+- 完成 Assistant Catalog / Assistant Instance 基本 API
+- 完成 Conversation 建立與列表 API
+- 完成前端頁面骨架與 API 串接
+
+則可在 MVP 前半段看到：
+- 登入頁
+- 首頁 / dashboard
+- 助理目錄頁
+- 助理實例頁
+- Conversation 主畫面
+
+六、建議下一步
+
+優先順序一
+- 補 Prisma schema 其餘模型
+- 補 conversation_events 寫入流程
+- 補 assistant catalog 真查詢與版本輸出
+
+優先順序二
+- 安裝依賴
+- 執行 prisma generate
+- 驗證 compile
+
+優先順序三
+- 開始前端主畫面骨架
+- 串接 Auth / Assistant / Conversation 三條 API
+
+七、簡短結論
+
+目前不是卡在需求，而是已經進到實作啟動期。
+若持續照既定路線推進，最早可在下一個實作階段看到主畫面與基本系統骨架。

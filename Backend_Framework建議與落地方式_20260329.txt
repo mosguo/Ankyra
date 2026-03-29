@@ -1,0 +1,160 @@
+Ankyra Backend Framework 建議與落地方式
+日期：2026-03-29
+
+一、目的
+本文件用於提出 Ankyra MVP 後端技術落地建議，協助團隊在正式開工前快速決定 API 框架、ORM、背景工作、AI 整合與專案結構。
+
+二、整體建議
+若以目前已建立的目錄、模組與文件風格來看，我建議 MVP 後端優先採用：
+
+- `Node.js + TypeScript`
+- `NestJS` 作為 API 框架
+- `Prisma` 或 `Drizzle ORM` 作為資料存取層
+- `PostgreSQL` 作為主要資料庫
+- `BullMQ` 或等價 queue 作為背景工作佇列
+- `OpenAI 官方 SDK` 作為模型整合層
+
+這條路線的優點是：
+- 適合模組化架構
+- 對 DTO、service、controller 分層友善
+- 適合 OAuth、REST API、背景工作與 AI orchestration
+- TypeScript 對前後端共用型別也較有利
+
+三、框架建議
+1. API 框架
+建議：`NestJS`
+
+原因：
+- 模組化結構與目前文件中的 module / controller / service / repository 思路一致
+- 便於導入 validation、guard、interceptor、config、queue
+- 對多人協作與中後期治理擴充較穩
+
+替代方案：
+- Fastify + Zod + 手工分層
+- Express + 自建結構
+
+但若以你目前已經整理的文件量與未來企業型需求來看，NestJS 更適合。
+
+2. ORM / DB Access
+建議優先：
+- `Prisma`
+
+原因：
+- migration、schema、型別支援成熟
+- 對 MVP 開發速度快
+- 團隊理解成本通常較低
+
+替代方案：
+- `Drizzle ORM`
+
+原因：
+- SQL 感更強
+- 與 migration / schema closer
+
+如果團隊希望速度優先，我建議先 Prisma。
+如果團隊偏向 SQL 清晰控制，可選 Drizzle。
+
+3. 資料庫
+建議：`PostgreSQL`
+
+原因：
+- 對 JSON 欄位、索引、事務、日後擴充都較適合
+- 很適合 conversation_event、policy、snapshot、audit 類場景
+
+四、AI 整合落地建議
+1. OpenAI SDK
+建議：
+- 使用官方 Node SDK
+- 將所有模型呼叫集中在 `packages/ai-core`
+- 不讓 controller 或一般 service 直接呼叫 OpenAI
+
+2. runtime 結構
+建議分層：
+- `AIRuntimeService`
+- `AssistantTurnOrchestrator`
+- `ContextBuilder`
+- `PromptLoader`
+- `PolicyEvaluator`
+- `ToolSelector`
+- `OpenAIRuntimeAdapter`
+
+這樣未來換模型、換 provider、加 tracing 才不會痛苦。
+
+3. tool calling
+建議：
+- 先做同步型 tool execution
+- 先支援 read-only 工具
+- tool execution result 統一轉成標準 DTO 後再回灌對話
+
+五、背景工作與排程
+建議：
+- `BullMQ`
+- Redis 作 queue backend
+
+原因：
+- 適合每日摘要、connector sync、notification dispatch
+- 易於監控 job 狀態與 retry
+
+MVP 建議 job 類型：
+- mail_sync
+- task_snapshot_generate
+- briefing_snapshot_generate
+- notification_dispatch
+- conversation_summary_generate
+
+六、Validation 與 Schema
+建議：
+- API 輸入驗證採 `class-validator` / `class-transformer`
+或
+- 若偏好 schema-first，可採 `Zod`
+
+若採 NestJS 標準做法，MVP 可先用：
+- DTO class + validation decorators
+
+七、Auth 與 Session
+建議：
+- OAuth2 provider callback 後建立 app session
+- MVP 可先用 server-side session 或 JWT 二選一
+
+若是企業型平台，我較建議：
+- access token / session abstraction 清楚
+- 不把 provider token 當 app session
+
+八、檔案與設定
+建議：
+- 環境變數集中管理
+- provider / connector config 模組化
+- `.env.example` 保持最小可讀
+
+九、Logging 與 Tracing
+MVP 建議：
+- API request log
+- AI runtime trace_id
+- tool invocation trace_id
+- audit log 分離
+
+可先簡化，不必一開始就上完整 observability stack。
+
+十、建議技術組合結論
+推薦 MVP 技術組合：
+- API：NestJS
+- ORM：Prisma
+- DB：PostgreSQL
+- Queue：BullMQ + Redis
+- AI：OpenAI Node SDK
+- Validation：Nest DTO + class-validator
+- Config：dotenv / Nest ConfigModule
+
+十一、落地順序
+1. 建立 NestJS app
+2. 建立 Prisma schema 與 migration
+3. 建立 module / controller / service / repository 結構
+4. 接 Auth 與 Assistant 基礎
+5. 接 Conversation + AI runtime
+6. 接 Connector + Snapshot
+7. 接 Notification + Governance
+
+十二、補充建議
+- WeChat / Twitter OAuth 在架構層預留即可，MVP 不必同時實作
+- Connector 先只做 Gmail 或 Outlook 一個 provider
+- Notification 先只做 LINE 或 Telegram 一個 provider

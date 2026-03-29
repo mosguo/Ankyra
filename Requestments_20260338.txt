@@ -1,0 +1,569 @@
+Ankyra 多用戶助理系統需求分析
+日期：2026-03-29
+
+1. 目標
+建立新的 Ankyra 專案，發展為一個多用戶助理平台。使用者透過 OAuth2 完成認證後，可申請不同種類的助理。助理依二維度架構設計，以工作類型與能力等級作為主要分類。系統透過 OpenAI 模型協助使用者處理工作，並保留長期對話、記憶、工具使用與政策控制能力，同時整合外部信箱與訊息通知平台。
+
+2. 核心願景
+本平台不只是聊天工具，而是企業型工作助理平台，重點包含：
+- 多用戶、多助理並行運作
+- 長期對話與記憶累積
+- 從使用者外部信箱取得資訊進行分析
+- 主動整理每日待辦與工作摘要
+- 將整理結果推送到常用通訊平台
+- 將 conversation、memory 與分析結果留存在公司系統內，形成公司資產
+
+3. 第一階段確認中的核心概念
+3.1 產品定位與目標客群
+- Ankyra 定位為面向工作場景的多用戶 AI 助理平台
+- 核心價值是長期工作協作、主動整理、工作記憶累積與跨通路通知
+- 第一優先客群建議聚焦企業內主管、專案負責人、協調型知識工作者
+- 第一版主打場景建議聚焦：
+  - 信箱整理
+  - 今日待辦盤點
+  - 晨會摘要
+  - 提醒推送
+- 第一版不建議同時做全通路、全場景與高風險全自動化
+
+3.2 使用者、角色與治理邊界
+- 建議角色包含：
+  - 平台超級管理者
+  - 平台營運管理者
+  - 租戶管理者
+  - 一般使用者
+  - 審批者
+  - 稽核／檢視者
+- 權限原則包含：
+  - 最小權限
+  - 資料隔離
+  - 功能隔離
+  - 政策優先
+  - 可追溯
+  - 可撤銷
+- 一般使用者以管理自己的助理、conversation、memory、通知與外部連線為主
+- 租戶管理者看租戶級彙總資訊，但不預設查看個人全文內容
+- 平台管理者看平台級統計與異常，但不預設查看租戶私有內容
+- 高風險助理與高權限工具應要求審批與稽核
+
+3.3 助理商品化與二維度規則
+- 助理是可被申請、可被控管、可被版本化、可被定價的工作能力單位
+- 助理不等於 prompt，也不等於單一模型
+- 助理建議採三層結構：
+  - assistant_definition
+  - assistant_version
+  - assistant_instance
+- 助理二維度建議定義為：
+  - 工作類型
+  - 能力等級
+- 能力等級建議採用：
+  - 初階
+  - 進階
+  - 專業
+- 第一版主力助理類型建議包含：
+  - 郵件整理
+  - 今日待辦
+  - 晨會摘要
+  - 會議整理
+  - 專案追蹤
+- 助理 SKU 建議由「工作類型 x 能力等級」形成
+- 版本採新增方式管理，不直接覆蓋舊版
+
+3.4 AI 治理原則與管理責任
+- AI 在 Ankyra 中定位為受控助理引擎，而非完全自治代理
+- 第一版 AI 主要處理整理、摘要、分析、建議與提醒
+- 第一版不建議讓 AI 自主執行高風險、不可逆或未審批之外發操作
+- AI 治理應涵蓋：
+  - 資料治理
+  - 工具治理
+  - 輸出治理
+  - 成本治理
+  - 風險治理
+- AI 管理責任建議分為：
+  - 產品責任
+  - 規則責任
+  - 技術責任
+  - 營運責任
+  - 驗證責任
+  - 稽核責任
+- 應建立 AI 模擬與驗證機制，以及 AI 分析與調整指標
+
+3.5 文件、審查與需求變更規則
+- 正式文件以中文為主
+- 文件類型建議包含：
+  - 需求主文件
+  - Plan 文件
+  - 階段分析文件
+  - 決議文件
+  - 變更紀錄文件
+  - 審查文件
+- 需求主文件代表正式有效版本
+- Plan 文件代表推進與完成紀錄
+- 討論結果應回寫需求與 Plan
+- 需求變更建議分為：
+  - 文字澄清
+  - 一般變更
+  - 重大變更
+- 審查機制統一歸為審查與放行機制
+- 所有正式文件都應保存於 repository
+
+4. 建議整體架構
+系統建議分為三層：
+
+4.1 應用主資料層
+由 Ankyra 自行持有，存於公司資料庫：
+- 使用者資料
+- 助理目錄
+- 助理申請與訂閱
+- conversation 對應表
+- conversation 事件帳本
+- 記憶資料
+- 工具權限資料
+- 通知紀錄
+- 計費與定價
+- 稽核紀錄
+
+4.2 AI 執行狀態層
+由 OpenAI API 提供執行支援：
+- Responses API 可透過歷史上下文或 previous_response_id 延續對話
+- Conversations API 可建立可持續存在的 conversation 物件，跨 session、裝置與背景工作延續
+- 此層應視為執行態，不應作為公司唯一資料主體
+
+4.3 分析與知識層
+由 Ankyra 自行累積：
+- 工作摘要知識
+- 任務與意圖萃取結果
+- 使用者偏好記憶
+- 跨對話分析
+- 助理升級與使用成效分析
+
+5. OpenAI Conversation 策略
+OpenAI 官方 API 已支援持續化對話狀態：
+- Responses API 可手動帶歷史訊息或 previous_response_id
+- Conversations API 可建立長期 conversation 物件
+
+建議運作方式：
+- 保留 OpenAI conversation 物件作為執行狀態
+- Ankyra 必須自行維護 conversation registry，對應內部紀錄與 OpenAI conversation ID
+- 每一次重要 user message、assistant output、tool call、tool result 都應保存到公司內部 ledger
+- 另外建立摘要與 memory extraction 流程，把真正長期價值保存在公司系統
+
+重要結論：
+OpenAI conversation 可作為運作核心之一，但 Ankyra 不能把它當成唯一資產來源。公司真正應保留的是自有 conversation ledger、memory 與分析資料。
+
+6. Conversation 長期運作設計
+6.1 Conversation Registry
+建議欄位：
+- internal_conversation_id
+- openai_conversation_id
+- user_id
+- assistant_instance_id
+- assistant_version_id
+- channel
+- status
+- started_at
+- last_activity_at
+
+6.2 Conversation Event Ledger
+採 append-only 事件模型，紀錄：
+- 使用者輸入
+- 助理輸出
+- 工具呼叫
+- 工具回傳
+- 政策判定
+- 助理版本切換
+- 通知發送
+
+6.3 上下文壓縮與整理
+長期 conversation 會造成成本、延遲與上下文膨脹，因此要有：
+- 分段摘要
+- 最近視窗上下文
+- 依主題或任務做記憶檢索
+- 選擇性回放，而非永遠重送完整歷史
+
+6.4 記憶提煉
+需獨立保存：
+- 使用者偏好
+- 固定工作習慣
+- 常見聯絡人與專案資訊
+- 尚未完成的待辦
+- 每日與每週摘要
+
+7. 助理升級與修訂策略
+助理應採版本化，而不是直接覆寫。
+
+建議結構：
+- assistant_definition：助理產品定義
+- assistant_version：prompt、工具、定價、政策、記憶策略版本
+- assistant_instance：使用者實際啟用的助理實例
+
+升級方式：
+- 最安全：新 conversation 使用新版本
+- 折衷：既有助理實例升級，並寫入版本遷移事件
+- 不建議：直接改寫舊歷史紀錄
+
+結論：
+助理可以升級，但 conversation 歷史應保持可追溯、可稽核、可辨識版本。
+
+8. 二維度助理矩陣
+主要設計：
+- 工作類型 x 能力等級
+
+工作類型示例：
+- 郵件整理
+- 今日待辦
+- 晨會摘要
+- 會議整理
+- 專案追蹤
+
+能力等級示例：
+- 初階
+- 進階
+- 專業
+
+每一個助理 SKU 應定義：
+- 指令策略
+- 可用工具
+- 審批層級
+- 記憶深度
+- 通知行為
+- 定價
+- 執行期望或 SLA
+
+9. 外部資訊處理流程
+主要使用情境：
+系統連接 Outlook 或 Gmail，讀取外部資訊，分析待辦工作，並在上班前或晨會前協助使用者整理今日工作重點。
+
+建議流程：
+- 使用者授權信箱
+- 排程器於早晨觸發工作
+- Connector 讀取近期郵件與行事曆脈絡
+- 分析器抽出待辦、待回覆、會議重點與優先級
+- 摘要器產出每日工作簡報
+- 通知服務將結果送到指定通路
+
+10. 建議系統元件
+- API Gateway 或 BFF
+- 認證服務
+- 使用者與租戶服務
+- 助理目錄服務
+- 助理申請／訂閱服務
+- Conversation Orchestrator
+- Memory 服務
+- Tool Connector 服務
+- Notification 服務
+- Scheduler / Worker 服務
+- Billing 服務
+- Admin / Analytics Console
+
+11. 建議核心資料模型
+主要資料表或實體：
+- users
+- organizations
+- oauth_identities
+- assistant_definitions
+- assistant_versions
+- assistant_instances
+- assistant_pricing
+- conversations
+- conversation_events
+- conversation_summaries
+- memories
+- memory_embeddings
+- tool_connections
+- tool_credentials_ref
+- tool_policies
+- notification_channels
+- notification_messages
+- task_snapshots
+- audit_logs
+- billing_subscriptions
+
+12. 政策與治理
+每位使用者需獨立隔離：
+- conversation scope
+- memory scope
+- tool access scope
+- policy scope
+
+政策示例：
+- 保留期限政策
+- 記憶寫入政策
+- 外部連結政策
+- 通知政策
+- 助理動作審批政策
+
+13. 交付建議
+不建議一次做完整平台，先完成三個最小閉環：
+
+閉環 1
+- OAuth2 登入
+- 助理申請
+- 持久化 conversation 狀態
+
+閉環 2
+- Outlook 或 Gmail 整合
+- 每日待辦萃取
+- 工作摘要生成
+
+閉環 3
+- LINE 或 Telegram 通知
+- 晨會與早晨簡報推送
+
+14. 工作分解
+Phase 1：產品與治理定義
+- 產品定位與目標客群
+- 使用者、角色與治理邊界
+- 助理商品化與二維度規則
+- AI 治理原則與管理責任
+- 文件、審查與需求變更規則
+
+Phase 2：核心資料與系統模型
+- 資料模型
+- 物件關聯
+- API 邊界
+- 權限資料結構
+- 儲存與索引設計
+
+Phase 3：AI 核心運作與治理控制
+- OpenAI orchestration
+- conversation registry
+- conversation ledger
+- memory extraction
+- summarization pipeline
+- AI 模擬與驗證
+- AI 分析與調整
+
+Phase 4：業務功能、外部整合與使用介面
+- Gmail 或 Outlook
+- Calendar 串接
+- 第一個通知通道
+- 使用者端介面
+- 管理端介面
+
+Phase 5：營運、分析、上線與持續優化
+- 定價管理
+- 助理升級路徑
+- 使用量計量
+- 管理後台分析
+- 上線與監控
+- 持續優化
+
+15. 可行性評估
+本案可行。真正困難點不只是在模型呼叫，而在：
+- 長期記憶品質
+- 助理版本治理
+- 外部 connector 穩定性
+- 隱私、合規與稽核
+- 通知平台兼容性與商務限制
+
+整體判斷：
+- 可行性：高
+- 架構複雜度：中高
+- 推進方式：應採分階段 MVP
+
+16. 初步人力估算
+MVP 階段：
+- 產品 / PO：1
+- 技術主管 / 架構師：1
+- 後端工程師：2
+- 前端工程師：1
+- AI / LLM 工程師：1
+- QA：1
+- DevOps 支援：0.5
+
+MVP 規模估算：
+- 約 6.5 至 7.5 人
+
+MVP 時程估算：
+- 約 2.5 至 4 個月
+
+商用版階段：
+- 產品 / PO：1
+- 技術主管 / 架構師：1
+- 後端工程師：3 至 4
+- 前端工程師：2
+- AI / LLM 工程師：1 至 2
+- QA：1 至 2
+- DevOps / SRE：1
+- 資安或合規支援：0.5 至 1
+
+商用版規模估算：
+- 約 10 至 14 人
+
+商用版時程估算：
+- 約 6 至 9 個月
+
+17. 備註與假設
+- 目前未附上助理分類圖片，因此暫以「工作類型」與「能力等級」作為二維度假設
+- Apple Messages、WeChat、WhatsApp 的正式整合可能涉及額外商務授權、供應商限制或合規要求
+- MVP 建議先從 Gmail 或 Outlook 擇一，再搭配一個較易落地的通知通道開始
+
+18. 參考說明
+本分析所依據之 OpenAI 官方文件重點：
+- Responses API conversation state 指南
+- Conversations API 參考文件
+- Responses API 遷移指南
+
+架構解讀：
+OpenAI 可提供持久化 conversation 執行能力，但 Ankyra 應保留自己的長期 conversation、memory 與分析架構，以維持公司資料主權與長期價值。
+
+19. 工作追蹤規則
+為了後續能在 repository 中追蹤進度，所有計畫與完成紀錄都要放入專案目錄。
+
+19.1 Level 分類
+工作項目採以下等級分類：
+- Level2
+- Level4.1
+- Level4.2
+
+19.2 Plan 檔名規則
+每次完成清單後，建立或更新一份 plan 檔。
+檔名要在日期後加上本次完成項目中的最高等級。
+
+建議格式：
+- Plan_YYYYMMDD_L2.txt
+- Plan_YYYYMMDD_L4.1.txt
+- Plan_YYYYMMDD_L4.2.txt
+
+若同一份 plan 內含多個 level，檔名應採最高 level。
+示例：
+- 若包含 Level2 與 Level4.1，檔名使用 Level4.1
+- 若包含 Level2、Level4.1、Level4.2，檔名使用 Level4.2
+
+19.3 Plan 內容規則
+每份 plan 檔至少需包含：
+- 計畫日期
+- 目標範圍
+- 依 level 分組的 checklist
+- 當前完成狀態
+- 已完成的最高 level
+- 備註與下一步
+
+19.4 Repository 追蹤原則
+所有 plan 檔都必須放入 repository 中，方便後續比對、稽核與追蹤。
+
+20. 第二階段摘要：核心資料與系統模型
+第二階段的目標，是把第一階段已確認的產品與治理結論轉成正式系統模型，重點不是功能畫面，而是核心實體、資料邊界與關聯規則。
+
+20.1 第二階段八組主題
+- 核心實體與關聯
+- 使用者／租戶／身分模型
+- 助理／版本／實例模型
+- conversation／memory／tool／policy 模型
+- 通知／排程／外部整合模型
+- 計費／方案／使用量模型
+- 稽核／日誌／治理模型
+- API 契約與資料邊界
+
+20.2 第二階段骨架主線
+- Organization -> User -> AssistantInstance -> Conversation -> ConversationEvent
+- AssistantDefinition -> AssistantVersion -> AssistantInstance
+- User -> Memory
+- User/Organization -> ToolConnection
+- Schedule -> Job -> TaskSnapshot / BriefingSnapshot
+- Subscription -> UsageRecord / BillingCycle / InvoiceRecord
+- Policy / ApprovalRecord / AuditLog / SecurityEvent
+
+20.3 第二階段核心原則
+- 核心資料需有明確 owner
+- 對話與記憶分離
+- 助理定義、版本、實例分離
+- 執行資料與治理資料分離
+- 外部識別與內部識別分離
+- 所有資料流遵守最小必要傳輸原則
+- OpenAI 只接收經整理、授權、裁切後的執行上下文
+- conversation ledger、memory、policy、audit 等正式資料保留在 Ankyra
+
+20.4 第二階段完成後應形成的正式產出
+- 主要實體清單
+- 資料表欄位草案
+- 關聯圖草案
+- 主要狀態模型
+- API 與 DTO 邊界
+- 事件流與治理記錄結構
+
+21. 第三階段摘要：AI 核心運作與治理控制
+第三階段的目標，是把第二階段建立的資料模型轉成真正可執行、可控、可驗證、可監控、可調整的 AI 執行核心。
+
+21.1 第三階段九組主題
+- AI orchestration 核心流程
+- Prompt 與模型治理
+- Conversation 運行控制
+- Memory 控制
+- Tool calling 控制
+- Policy 執行引擎
+- AI 模擬與驗證
+- AI 分析與調整
+- AI 監控與異常處理
+
+21.2 第三階段核心原則
+- AI 執行需有明確主流程
+- Prompt 與模型變更需可追溯
+- 對話上下文需可壓縮、可持續
+- 記憶寫入與召回需受控
+- 工具使用需驗證、可重試、可降級
+- Policy 在執行過程中高於 prompt 自由度
+- AI 改版需可模擬、可回歸、可比較
+- 正式運行需可監控、可告警、可止血
+
+21.3 第三階段執行主線
+- 收到任務
+- 載入 assistant instance / version
+- 載入 user / organization / policy / memory / tool 上下文
+- 組裝 AIContextPayload
+- 判斷可用資料與可用工具
+- 呼叫 OpenAI
+- 處理 tool calling 迴圈
+- 產出回應
+- 回寫 conversation / memory / summary / snapshot / audit / usage / monitoring
+
+22. 第四階段摘要：業務功能、外部整合與使用介面
+第四階段的目標，是把前三階段已確認的產品、資料與 AI 核心控制，落成使用者實際可操作的功能、管理流程、外部整合能力與互動介面。
+
+22.1 第四階段十組主題
+- 使用者登入與帳號進入流程
+- 助理申請、開通、升級與停用流程
+- Conversation 與助理互動介面
+- Memory、待辦與摘要檢視介面
+- 外部帳號授權與連結介面
+- 外部資料整合流程與呈現
+- 通知通路設定與發送流程
+- 管理後台與租戶管理介面
+- 審批、稽核與治理操作介面
+- 使用者方案、訂閱與計費介面
+
+22.2 第四階段核心原則
+- 使用者流程要與角色、方案、助理可見性一致
+- 助理流程要與審批、版本、訂閱規則一致
+- 對話介面要能呈現 AI 狀態、來源、摘要與工具痕跡
+- 外部整合介面要讓授權範圍與連線狀態清楚可見
+- 通知要可設定、可追蹤、可重送、可限制
+- 管理與治理介面要能支撐審批、稽核與營運分析
+
+23. 第五階段摘要：營運、分析、上線與持續優化
+第五階段的目標，是把前四階段形成的產品、資料、AI 核心與功能介面，正式轉為可上線、可營運、可分析、可監控與可持續優化的商用系統。
+
+23.1 第五階段十組主題
+- 營運指標與分析體系
+- AI 成效分析與模型優化
+- 營運後台報表與觀測介面
+- 監控、告警與異常處理
+- 測試、驗收與上線前放行
+- 部署、環境與 CI/CD
+- 資料保護、備份與復原
+- 效能、擴充與可靠性
+- 資安、合規與正式治理
+- 持續優化與版本演進
+
+23.2 第五階段核心原則
+- 先定義衡量指標，再談優化
+- AI 優化需以實際數據為依據
+- 營運、治理、技術監控需形成閉環
+- 上線前應有正式測試與放行機制
+- 正式環境需支援備份、回滾與復原
+- 平台需具備資安、合規與治理能力
+- 產品、助理、prompt、模型與工具都要有持續演進機制
+
+22.3 第四階段補充規則
+- OAuth2 provider 第一版至少支援 Google、Microsoft、WeChat、Twitter
+- OAuth provider 設計需保留可擴充性，未來可新增其他企業或社交通道

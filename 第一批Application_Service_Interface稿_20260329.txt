@@ -1,0 +1,157 @@
+Ankyra 第一批 Application Service Interface 稿
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批 application service 介面草稿，作為後續 service implementation、controller 串接與測試替身設計依據。
+
+二、IdentityModule
+1. AuthService
+介面建議：
+- beginOAuthLogin(command: BeginOAuthLoginCommand): AuthorizationUrlResult
+- handleOAuthCallback(command: HandleOAuthCallbackCommand): AuthContextDto
+- getCurrentAuthContext(query: GetCurrentAuthContextQuery): AuthContextDto
+- switchOrganization(command: SwitchOrganizationCommand): AuthContextDto
+
+2. UserService
+介面建議：
+- getUserById(userId: string): UserDto
+- ensureUserFromOAuth(input: OAuthIdentityInput): UserDto
+
+3. MembershipService
+介面建議：
+- getActiveMemberships(userId: string): MembershipDto[]
+- validateMembership(userId: string, organizationId: string): MembershipValidationResult
+
+三、AssistantModule
+1. AssistantCatalogService
+介面建議：
+- listVisibleAssistants(query: ListAssistantCatalogQuery): AssistantCatalogItemDto[]
+- getAssistantDefinition(query: GetAssistantDefinitionQuery): AssistantDefinitionDetailDto
+
+2. AssistantInstanceService
+介面建議：
+- createAssistantInstance(command: CreateAssistantInstanceCommand): AssistantInstanceDto
+- upgradeAssistantInstance(command: UpgradeAssistantInstanceCommand): AssistantInstanceDto
+- suspendAssistantInstance(command: SuspendAssistantInstanceCommand): AssistantInstanceDto
+- getAssistantInstanceById(assistantInstanceId: string): AssistantInstanceDto
+
+3. AssistantApprovalService
+介面建議：
+- evaluateAssistantApprovalRequirement(input: AssistantApprovalCheckInput): ApprovalRequirementResult
+
+四、ConversationModule
+1. ConversationService
+介面建議：
+- createConversation(command: CreateConversationCommand): ConversationDto
+- listConversations(query: ListConversationsQuery): ConversationDto[]
+- getConversationDetail(query: GetConversationDetailQuery): ConversationDetailDto
+
+2. ConversationEventService
+介面建議：
+- appendUserMessage(command: AppendConversationUserMessageCommand): ConversationEventDto
+- appendAssistantMessage(input: AppendConversationAssistantMessageInput): ConversationEventDto
+- appendToolEvent(input: AppendConversationToolEventInput): ConversationEventDto
+
+3. ConversationSummaryService
+介面建議：
+- createSummary(input: CreateConversationSummaryInput): ConversationSummaryDto
+- getLatestSummary(conversationId: string): ConversationSummaryDto
+
+五、AICoreModule
+1. AIRuntimeService
+介面建議：
+- runAssistantTurn(command: SendConversationMessageCommand): AssistantTurnResultDto
+
+2. PromptService
+介面建議：
+- resolvePromptBundle(assistantVersionId: string): PromptBundleDto
+
+3. MemoryRuntimeService
+介面建議：
+- selectMemoryCandidates(input: MemorySelectionInput): MemoryCandidateDto[]
+- writeMemoryCandidates(input: MemoryWriteInput): MemoryWriteResult
+
+4. ToolRuntimeService
+介面建議：
+- getAvailableTools(input: ToolAvailabilityInput): ToolDescriptorDto[]
+- executeTool(input: ToolExecutionRequestDto): ToolExecutionResultDto
+
+5. PolicyRuntimeService
+介面建議：
+- evaluateRuntimePolicies(input: PolicyEvaluationInput): PolicyDecisionSetDto
+
+六、ConnectorModule
+1. ConnectorService
+介面建議：
+- beginConnectorAuthorization(command: BeginConnectorAuthorizationCommand): AuthorizationUrlResult
+- handleConnectorCallback(input: ConnectorCallbackInput): ConnectorAccountDto
+- listConnectorAccounts(query: ListConnectorAccountsQuery): ConnectorAccountDto[]
+- revokeConnector(command: RevokeConnectorCommand): ConnectorAccountDto
+
+2. ConnectorSyncService
+介面建議：
+- syncConnector(input: ConnectorSyncInput): ConnectorSyncResultDto
+
+3. MailIngestionService
+介面建議：
+- fetchMailItems(input: MailFetchInput): MailItemDto[]
+- normalizeMailItems(items: MailItemDto[]): NormalizedMailItemDto[]
+
+七、SnapshotModule
+1. TaskSnapshotService
+介面建議：
+- generateTaskSnapshot(input: GenerateTaskSnapshotInput): TaskSnapshotDto
+- getTodayTaskSnapshot(query: GetTodayTaskSnapshotQuery): TaskSnapshotDto
+
+2. BriefingSnapshotService
+介面建議：
+- generateBriefingSnapshot(input: GenerateBriefingSnapshotInput): BriefingSnapshotDto
+- getTodayBriefingSnapshot(query: GetTodayBriefingSnapshotQuery): BriefingSnapshotDto
+
+八、NotificationModule
+1. NotificationPreferenceService
+介面建議：
+- listNotificationPreferences(query: ListNotificationPreferencesQuery): NotificationPreferenceDto[]
+- updateNotificationPreference(command: UpdateNotificationPreferenceCommand): NotificationPreferenceDto
+
+2. NotificationDispatchService
+介面建議：
+- queueNotification(input: QueueNotificationInput): NotificationMessageDto
+- sendNotification(notificationMessageId: string): NotificationDispatchResultDto
+- listNotificationMessages(query: ListNotificationMessagesQuery): NotificationMessageDto[]
+
+九、GovernanceModule
+1. ApprovalService
+介面建議：
+- createApprovalRequest(input: CreateApprovalRequestInput): ApprovalRecordDto
+- listApprovals(query: ListApprovalsQuery): ApprovalRecordDto[]
+- approveRequest(command: ApproveRequestCommand): ApprovalRecordDto
+- rejectRequest(command: RejectRequestCommand): ApprovalRecordDto
+
+2. AuditService
+介面建議：
+- writeAuditLog(input: AuditLogInput): AuditLogDto
+- listAuditLogs(query: ListAuditLogsQuery): AuditLogDto[]
+
+3. PolicyService
+介面建議：
+- getEffectivePolicies(input: EffectivePolicyQuery): PolicyBundleDto
+
+十、BillingModule
+1. PlanService
+介面建議：
+- listPlans(scope: string): PlanDto[]
+
+2. SubscriptionService
+介面建議：
+- getActiveSubscription(subscriberType: string, subscriberId: string): SubscriptionDto
+- validateAssistantEligibility(input: AssistantEligibilityInput): AssistantEligibilityResult
+
+3. UsageService
+介面建議：
+- recordUsage(input: RecordUsageInput): UsageRecordDto
+
+十一、實作建議
+- service 介面先穩定，再實作 infrastructure
+- application service 回傳 DTO，不直接回傳 entity
+- orchestration 可拆成 façade + internal coordinator

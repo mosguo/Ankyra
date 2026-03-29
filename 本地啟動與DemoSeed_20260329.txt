@@ -1,0 +1,94 @@
+Ankyra 本地啟動與 Demo Seed 指引
+日期：2026-03-29
+
+一、目的
+- 讓新進開發者可在本地快速啟動 API 與前端
+- 讓展示環境可快速建立可用 demo 資料
+- 讓交接時能明確知道目前 demo seed 會建立哪些內容
+
+二、必要條件
+- Node.js 20 以上
+- npm
+- PostgreSQL
+- 可寫入 `.env`
+
+三、環境設定
+1. 複製 `.env.example` 為 `.env`
+2. 設定本地資料庫連線
+3. 確認 `VITE_API_BASE_URL=http://localhost:3000/api`
+
+建議本地資料庫：
+- `postgresql://postgres:postgres@localhost:5432/ankyra?schema=public`
+
+四、第一次啟動步驟
+1. `npm install`
+2. `npm run dev:setup`
+3. `npm run dev:api`
+4. `npm run dev:web`
+
+五、`dev:setup` 內容
+- `npm run prisma:generate`
+- `npm run prisma:push`
+- `npm run seed:demo`
+
+六、Demo Seed 會建立的資料
+1. 基礎身份資料
+- 1 個 demo organization
+- 1 個 demo admin user
+- 1 個 demo end user
+- Google / Microsoft OAuth identity
+
+2. 助理資料
+- Mail Assistant Basic
+- Task Assistant Basic
+- Briefing Assistant Basic
+- 對應的 assistant version
+- 1 個已啟用 assistant instance
+
+3. 對話資料
+- 1 條 demo conversation
+- 2 筆 conversation events
+
+4. Connector 資料
+- 1 個 Gmail demo connector
+- 1 筆 mail sync state
+
+5. Snapshot 資料
+- 1 筆 task snapshot
+- 1 筆 briefing snapshot
+
+6. 通知資料
+- LINE / Telegram notification channel
+- 1 筆預設 notification preference
+- 1 筆 demo notification message
+
+7. 治理資料
+- 1 筆 approval record
+- 1 筆 audit log
+
+8. Job / Schedule 資料
+- 1 筆 connector sync schedule
+- 1 筆已完成 job
+
+七、目前適合展示的流程
+1. Dashboard 檢查 catalog / task / briefing / jobs
+2. OAuth providers 點選 demo login
+3. Assistant Catalog 建立 instance
+4. Conversation 發送訊息
+5. Connectors 建立 Gmail / Outlook connector
+6. 執行 `Sync now`
+7. 檢查 Tasks / Briefing / Notifications 更新
+8. 在 Connectors 建立 schedule 並 `Run job`
+9. 在 Admin 檢查 approvals / audit / jobs / schedules / latest sync
+
+八、目前限制
+- OAuth 是 demo flow，未接真實 provider callback
+- Connector sync 是 demo sync，未接真實 Gmail / Outlook API
+- Schedule 已接 in-process 背景排程器骨架，但尚未接正式 queue/worker
+- Seed 採 `prisma db push` 模式，尚未接正式 migration pipeline
+
+九、交接建議
+1. 先用 `dev:setup` 建出本地展示環境
+2. 用本文件做第一次 demo walkthrough
+3. 若要展示自動排程，確認 `.env` 內 `SCHEDULER_ENABLED=true`
+4. 再往下接真實 OAuth、真實 connector、背景 job queue

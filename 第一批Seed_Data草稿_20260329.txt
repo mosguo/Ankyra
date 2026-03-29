@@ -1,0 +1,208 @@
+Ankyra 第一批 Seed Data 草稿
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批建議 seed data，用於本機開發、測試環境初始化、Demo 展示與 API 串接驗證。
+
+二、Seed 原則
+1. 先放最小可跑資料，不追求完整
+2. 優先支援登入、助理目錄、通知通路、方案與基本治理
+3. 測試資料需可對應 MVP 主場景
+4. 正式環境不可直接沿用測試 seed
+
+三、第一批 Seed 類別
+1. organizations
+2. users
+3. memberships
+4. oauth_identities
+5. assistant_definitions
+6. assistant_versions
+7. notification_channels
+8. plans
+9. subscriptions
+10. policies
+11. tool_policies
+
+四、Seed 草稿內容
+1. organizations
+建議至少建立：
+- org_demo_001
+  - organization_code: DEMOORG
+  - organization_name: Ankyra Demo Org
+  - organization_type: enterprise
+  - status: active
+  - default_language: zh-TW
+  - default_timezone: Asia/Taipei
+
+2. users
+建議至少建立：
+- usr_admin_001
+  - display_name: Demo Admin
+  - email: admin@demo.local
+  - status: active
+- usr_user_001
+  - display_name: Demo User
+  - email: user@demo.local
+  - status: active
+
+3. memberships
+建議至少建立：
+- Demo Admin -> DEMOORG
+  - membership_status: active
+  - is_primary: true
+- Demo User -> DEMOORG
+  - membership_status: active
+  - is_primary: true
+
+4. oauth_identities
+若開發環境需模擬，可建立測試映射：
+- provider: google
+  - provider_subject: google-demo-admin
+  - user_id: usr_admin_001
+- provider: microsoft
+  - provider_subject: ms-demo-user
+  - user_id: usr_user_001
+
+5. assistant_definitions
+MVP 建議先 seed 3 種助理 x 2 等級
+
+郵件整理
+- MAIL_BASIC
+  - assistant_name: 郵件整理助理（初階）
+  - work_type: mail_management
+  - capability_level: basic
+  - status: active
+- MAIL_ADVANCED
+  - assistant_name: 郵件整理助理（進階）
+  - work_type: mail_management
+  - capability_level: advanced
+  - status: active
+
+今日待辦
+- TASK_BASIC
+  - assistant_name: 今日待辦助理（初階）
+  - work_type: daily_tasking
+  - capability_level: basic
+  - status: active
+- TASK_ADVANCED
+  - assistant_name: 今日待辦助理（進階）
+  - work_type: daily_tasking
+  - capability_level: advanced
+  - status: active
+
+晨會摘要
+- BRIEFING_BASIC
+  - assistant_name: 晨會摘要助理（初階）
+  - work_type: standup_briefing
+  - capability_level: basic
+  - status: active
+- BRIEFING_ADVANCED
+  - assistant_name: 晨會摘要助理（進階）
+  - work_type: standup_briefing
+  - capability_level: advanced
+  - status: active
+
+6. assistant_versions
+每個 definition 先建立一版：
+- version_number: 1
+- version_label: v1.0
+- status: active
+- system_prompt_ref: seed/system/<assistant_code>.md
+- developer_prompt_ref: seed/developer/<assistant_code>.md
+
+7. notification_channels
+MVP 建議先 seed：
+- line
+  - channel_name: LINE
+  - provider: line
+  - status: active
+- telegram
+  - channel_name: Telegram
+  - provider: telegram
+  - status: active
+
+8. plans
+建議至少建立：
+- PLAN_TRIAL
+  - plan_name: 試用方案
+  - plan_type: trial
+  - target_scope: user
+  - status: active
+- PLAN_STANDARD
+  - plan_name: 標準方案
+  - plan_type: standard
+  - target_scope: organization
+  - status: active
+
+9. subscriptions
+建議至少建立：
+- sub_demo_001
+  - plan_id: PLAN_TRIAL
+  - subscriber_type: organization
+  - subscriber_id: org_demo_001
+  - subscription_status: active
+
+10. policies
+建議先 seed 最小政策：
+- POL_DATA_BASIC
+  - policy_type: data_policy
+  - policy_scope: organization
+- POL_OUTPUT_BASIC
+  - policy_type: output_policy
+  - policy_scope: assistant_version
+- POL_APPROVAL_ADVANCED
+  - policy_type: approval_policy
+  - policy_scope: assistant_version
+
+11. tool_policies
+建議：
+- MAIL_BASIC -> gmail read_only
+- MAIL_ADVANCED -> gmail read_only
+- TASK_BASIC -> no external tool 或 limited
+- BRIEFING_ADVANCED -> gmail read_only
+
+五、第一批測試資料建議
+1. conversation 測試資料
+- 至少 1 條郵件整理 conversation
+- 至少 1 條待辦整理 conversation
+
+2. connector 測試資料
+- 1 個 active Gmail account
+- 1 個 expired connector 狀態
+
+3. snapshot 測試資料
+- 1 份今日待辦 snapshot
+- 1 份晨會摘要 snapshot
+
+4. approval 測試資料
+- 1 筆 pending approval
+- 1 筆 approved approval
+
+5. audit 測試資料
+- 1 筆 assistant_activated
+- 1 筆 tool_connected
+
+六、Seed 實作建議
+- 先用文字或 JSON seed 描述
+- 正式實作時可拆成：
+  - base seed
+  - demo seed
+  - test seed
+- prompt 檔可先放 placeholder 內容
+- provider token 不應放 seed
+
+七、MVP 第一版最少需要的 seed
+- 1 個 organization
+- 2 個 user
+- 6 個 assistant_definitions
+- 6 個 assistant_versions
+- 2 個 notification_channels
+- 2 個 plans
+- 1 個 active subscription
+- 3 個 policies
+
+八、後續可再補的 seed
+- 多租戶資料
+- 多方案資料
+- 多 provider connector 假資料
+- 更多 approval / audit / notification 記錄

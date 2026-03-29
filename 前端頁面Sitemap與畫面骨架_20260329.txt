@@ -1,0 +1,284 @@
+Ankyra 前端頁面 Sitemap 與畫面骨架
+日期：2026-03-29
+
+一、目的
+本文件定義 MVP 第一批前端頁面結構、主要導覽關係與每頁畫面骨架，作為前端設計與實作依據。
+
+二、Sitemap
+1. 公開區
+- Login Page
+- OAuth Redirect / Callback Page
+
+2. 使用者區
+- Dashboard
+- Assistant Catalog
+- Assistant Detail
+- My Assistants
+- Conversation List
+- Conversation Detail
+- Today Tasks
+- Today Briefing
+- Memories
+- Connectors
+- Notification Preferences
+- Account Settings
+
+3. 管理區
+- Admin Dashboard
+- User List
+- Assistant Instance List
+- Approval Queue
+- Audit Log
+- Connector Status
+
+4. 共用頁
+- Error Page
+- Access Denied Page
+- Loading / Processing Page
+
+三、主要導覽流
+1. 登入流
+- Login Page
+- OAuth Callback
+- Dashboard
+
+2. 助理啟用流
+- Dashboard
+- Assistant Catalog
+- Assistant Detail
+- Create Assistant Instance
+- My Assistants
+
+3. 對話流
+- My Assistants
+- Conversation List
+- Conversation Detail
+
+4. 外部整合流
+- Dashboard
+- Connectors
+- Provider Authorize
+- Connector Connected
+
+5. 每日工作流
+- Dashboard
+- Today Tasks
+- Today Briefing
+- Notification Preferences
+
+6. 管理流
+- Admin Dashboard
+- User List / Assistant Instance List / Approval Queue / Audit Log
+
+四、頁面骨架
+1. Login Page
+區塊：
+- 品牌區
+- 產品簡介
+- OAuth provider buttons
+- 使用說明簡述
+
+主要元件：
+- Google Login Button
+- Microsoft Login Button
+- WeChat Login Button
+- Twitter Login Button
+
+2. Dashboard
+區塊：
+- Header / Organization Switcher
+- Quick Summary Cards
+- Today Tasks Preview
+- Today Briefing Preview
+- My Assistants Quick Access
+- Notifications / Alerts
+
+主要元件：
+- Current Organization Badge
+- Active Assistants Count
+- Pending Approvals Badge 可依角色顯示
+- Task Preview Card
+- Briefing Preview Card
+
+3. Assistant Catalog
+區塊：
+- Filter Bar
+- Assistant Cards Grid
+
+主要元件：
+- Work Type Filter
+- Capability Level Filter
+- Assistant Card
+  - name
+  - work type
+  - capability level
+  - approval required badge
+  - apply button
+
+4. Assistant Detail
+區塊：
+- Assistant Summary
+- Capability Overview
+- Tool Access Summary
+- Pricing / Plan Hint
+- Apply / Upgrade Action
+
+5. My Assistants
+區塊：
+- Assistant Instance List
+- Status Filter
+- Quick Actions
+
+主要元件：
+- Instance Card
+  - instance name
+  - version
+  - status
+  - last used
+  - open conversation
+  - upgrade
+  - suspend
+
+6. Conversation List
+區塊：
+- Assistant Selector
+- Conversation List
+- Search / Status Filter
+
+7. Conversation Detail
+區塊：
+- Header with Assistant Info
+- Conversation Timeline
+- Tool Usage Hint Area
+- Input Box
+- Processing Status
+
+主要元件：
+- Event Bubble
+- Summary Banner
+- Version Info Badge
+- Tool Activity Badge
+- Send Message Form
+
+8. Today Tasks
+區塊：
+- Snapshot Header
+- Task List
+- Source Summary
+- Refresh Action
+
+主要元件：
+- Task Item
+  - title
+  - priority
+  - source
+  - status
+
+9. Today Briefing
+區塊：
+- Briefing Header
+- Briefing Sections
+- Key Items
+- Send / Notify Actions
+
+10. Memories
+區塊：
+- Memory Filters
+- Memory Summary List
+- Memory Detail Drawer
+
+11. Connectors
+區塊：
+- Provider Cards
+- Connection Status
+- Authorize / Reauthorize / Revoke Actions
+
+主要元件：
+- Gmail / Outlook Card
+- scope summary
+- status badge
+
+12. Notification Preferences
+區塊：
+- Channel List
+- Default Channel Setting
+- Quiet Hours Setting
+- Message Type Toggle
+- Daily Limit Setting
+
+13. Admin Dashboard
+區塊：
+- Tenant Summary Cards
+- Usage Overview
+- Approval Pending Panel
+- Audit / Risk Panel
+
+14. User List
+區塊：
+- Search
+- Filter
+- Table
+
+主要欄位：
+- user
+- status
+- role summary
+- connected providers
+
+15. Assistant Instance List
+區塊：
+- Filters
+- Table / Cards
+
+主要欄位：
+- user
+- assistant
+- version
+- instance status
+- approval status
+
+16. Approval Queue
+區塊：
+- Pending Approval List
+- Detail Panel
+- Approve / Reject Action
+
+17. Audit Log
+區塊：
+- Filters
+- Timeline / Table
+
+主要欄位：
+- action
+- actor
+- target
+- status
+- created_at
+
+18. Connector Status
+區塊：
+- Provider status table
+- Expired / Error panel
+
+五、MVP 先做頁面
+第一優先：
+- Login Page
+- Dashboard
+- Assistant Catalog
+- My Assistants
+- Conversation Detail
+- Today Tasks
+- Today Briefing
+- Connectors
+- Notification Preferences
+
+第二優先：
+- Admin Dashboard
+- Approval Queue
+- Audit Log
+
+六、設計建議
+- 使用者區與管理區導覽分離
+- 對話頁與摘要頁要有明確關係，但不要混成一頁
+- 每個外部來源都要標記來源 provider
+- 每個 AI 產出結果要讓使用者知道來自哪個助理與哪次整理

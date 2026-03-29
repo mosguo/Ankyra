@@ -1,0 +1,349 @@
+Ankyra 第一批 API JSON 範例
+日期：2026-03-29
+
+一、Auth API
+1. POST /auth/oauth/login
+Request
+```json
+{
+  "provider": "google",
+  "redirect_uri": "https://app.example.com/auth/callback"
+}
+```
+
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth?..."
+  }
+}
+```
+
+2. GET /auth/me
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "user_id": "usr_001",
+      "display_name": "Alex Chen",
+      "email": "alex@example.com",
+      "timezone": "Asia/Taipei",
+      "status": "active"
+    },
+    "current_organization": {
+      "organization_id": "org_001",
+      "organization_name": "Ankyra Demo Org"
+    },
+    "roles": [
+      "end_user"
+    ]
+  }
+}
+```
+
+二、Assistant API
+1. GET /assistants/catalog
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "assistants": [
+      {
+        "assistant_definition_id": "asst_def_mail_basic",
+        "assistant_code": "MAIL_BASIC",
+        "assistant_name": "郵件整理助理（初階）",
+        "work_type": "mail_management",
+        "capability_level": "basic",
+        "approval_required": false
+      },
+      {
+        "assistant_definition_id": "asst_def_briefing_adv",
+        "assistant_code": "BRIEFING_ADVANCED",
+        "assistant_name": "晨會摘要助理（進階）",
+        "work_type": "standup_briefing",
+        "capability_level": "advanced",
+        "approval_required": true
+      }
+    ]
+  }
+}
+```
+
+2. POST /assistant-instances
+Request
+```json
+{
+  "assistant_definition_id": "asst_def_mail_basic",
+  "organization_id": "org_001",
+  "instance_name": "我的郵件整理助理"
+}
+```
+
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "assistant_instance": {
+      "assistant_instance_id": "asst_inst_001",
+      "instance_name": "我的郵件整理助理",
+      "instance_status": "active",
+      "approval_status": "not_required"
+    }
+  }
+}
+```
+
+三、Conversation API
+1. POST /conversations
+Request
+```json
+{
+  "assistant_instance_id": "asst_inst_001",
+  "channel": "web"
+}
+```
+
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "conversation": {
+      "conversation_id": "conv_001",
+      "assistant_instance_id": "asst_inst_001",
+      "conversation_status": "active"
+    }
+  }
+}
+```
+
+2. POST /conversations/{id}/messages
+Request
+```json
+{
+  "content": "請幫我整理今天信箱裡最重要的三件事"
+}
+```
+
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "user_event": {
+      "conversation_event_id": "evt_1001",
+      "event_type": "user_message"
+    },
+    "assistant_event": {
+      "conversation_event_id": "evt_1002",
+      "event_type": "assistant_message",
+      "content": {
+        "summary": "今天最重要的三件事如下...",
+        "items": [
+          "客戶 A 待回覆報價",
+          "下午 3 點專案會議",
+          "主管要求更新週報"
+        ]
+      }
+    }
+  }
+}
+```
+
+四、Snapshot API
+1. GET /task-snapshots/today
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "snapshot_date": "2026-03-29",
+    "tasks": [
+      {
+        "title": "回覆客戶 A 報價",
+        "priority": "high",
+        "source": "gmail"
+      },
+      {
+        "title": "準備下午專案會議",
+        "priority": "medium",
+        "source": "calendar"
+      }
+    ],
+    "source_summary": {
+      "mail_count": 12,
+      "meeting_count": 3
+    }
+  }
+}
+```
+
+2. GET /briefing-snapshots/today
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "briefing_date": "2026-03-29",
+    "sections": [
+      {
+        "title": "今日重點",
+        "content": "優先完成客戶 A 報價與下午專案會議準備。"
+      }
+    ],
+    "key_items": [
+      "待回覆 2 件",
+      "今日會議 3 場"
+    ]
+  }
+}
+```
+
+五、Connector API
+1. POST /connectors/gmail/authorize
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth?..."
+  }
+}
+```
+
+2. GET /connectors
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "connections": [
+      {
+        "connector_account_id": "conn_001",
+        "provider_type": "gmail",
+        "account_email": "alex@example.com",
+        "connection_status": "active",
+        "last_verified_at": "2026-03-29T08:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+六、Notification API
+1. GET /notification-preferences
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "preferences": [
+      {
+        "notification_preference_id": "np_001",
+        "channel_code": "telegram",
+        "preference_status": "active",
+        "is_default": true,
+        "daily_send_limit": 3
+      }
+    ]
+  }
+}
+```
+
+2. PUT /notification-preferences/{id}
+Request
+```json
+{
+  "preference_status": "active",
+  "is_default": true,
+  "quiet_hours_json": {
+    "start": "22:00",
+    "end": "07:00"
+  },
+  "allowed_message_types_json": [
+    "daily_briefing",
+    "task_reminder"
+  ],
+  "daily_send_limit": 3
+}
+```
+
+七、Approval API
+1. GET /approvals
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "approvals": [
+      {
+        "approval_record_id": "apr_001",
+        "request_type": "assistant_activation",
+        "request_target_id": "asst_inst_009",
+        "approval_status": "pending",
+        "requested_at": "2026-03-29T09:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+2. POST /approvals/{id}/approve
+Request
+```json
+{
+  "comments": "核准使用進階晨會摘要助理"
+}
+```
+
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "approval_record": {
+      "approval_record_id": "apr_001",
+      "approval_status": "approved",
+      "approved_at": "2026-03-29T09:30:00Z"
+    }
+  }
+}
+```
+
+八、Audit API
+1. GET /audit-logs
+Response
+```json
+{
+  "success": true,
+  "data": {
+    "audit_logs": [
+      {
+        "audit_log_id": "aud_001",
+        "action_type": "assistant_activated",
+        "target_type": "assistant_instance",
+        "target_id": "asst_inst_001",
+        "result_status": "success",
+        "created_at": "2026-03-29T09:31:00Z"
+      }
+    ]
+  }
+}
+```
+
+九、錯誤回應範例
+```json
+{
+  "success": false,
+  "error": {
+    "code": "APPROVAL_REQUIRED",
+    "message": "此助理需經審批後方可開通"
+  }
+}
+```

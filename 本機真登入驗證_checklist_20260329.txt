@@ -1,0 +1,83 @@
+Ankyra 本機真登入驗證 Checklist
+
+一、環境前置
+1. 確認 PostgreSQL 已啟動
+2. 確認 `.env` 已存在
+3. 確認 `DATABASE_URL` 可正常連線
+4. 確認 `APP_API_BASE_URL=http://localhost:3000`
+5. 確認 `APP_WEB_BASE_URL=http://localhost:5173`
+6. 確認 `VITE_API_BASE_URL=http://localhost:3000/api`
+7. 確認 `AUTH_SESSION_SECRET` 已設定
+
+二、Google / Microsoft 真 OAuth
+1. 確認 `GOOGLE_OAUTH_CLIENT_ID` 已填
+2. 確認 `GOOGLE_OAUTH_CLIENT_SECRET` 已填
+3. 確認 Google redirect URI 已設定：
+   `http://localhost:3000/api/auth/oauth/callback/google`
+4. 確認 `MICROSOFT_OAUTH_CLIENT_ID` 已填
+5. 確認 `MICROSOFT_OAUTH_CLIENT_SECRET` 已填
+6. 確認 `MICROSOFT_OAUTH_TENANT_ID` 已設定
+7. 確認 Microsoft redirect URI 已設定：
+   `http://localhost:3000/api/auth/oauth/callback/microsoft`
+
+三、Gmail / Outlook Connector 真 OAuth
+1. 確認 `GMAIL_CLIENT_ID` 已填
+2. 確認 `GMAIL_CLIENT_SECRET` 已填
+3. 確認 Gmail connector redirect URI 已設定：
+   `http://localhost:3000/api/connectors/oauth/callback/gmail`
+4. 確認 `OUTLOOK_CLIENT_ID` 已填
+5. 確認 `OUTLOOK_CLIENT_SECRET` 已填
+6. 確認 Outlook connector redirect URI 已設定：
+   `http://localhost:3000/api/connectors/oauth/callback/outlook_mail`
+
+四、資料庫與 Schema
+1. 執行 `npm install`
+2. 執行 `npm run prisma:generate`
+3. 執行 `npm run prisma:push`
+4. 確認 `UserSession` table 已建立
+5. 確認 `ConnectorTokenRef` table 已建立
+6. 執行 `npm run seed:demo`
+
+五、本機啟動
+1. 執行 `npm run dev:api`
+2. 執行 `npm run dev:web`
+3. 開啟 `http://localhost:5173`
+
+六、真登入驗證
+1. 在 Dashboard 點 `Google (oauth2)` 或 `Microsoft (oauth2)`
+2. 完成 provider 授權
+3. 確認回到前端後已登入
+4. 確認 sidebar 顯示 `Session: persisted`
+5. 重新整理頁面
+6. 確認登入狀態仍存在
+7. 點 `Sign out`
+8. 確認 session 被清除
+
+七、切換組織驗證
+1. 若帳號有多個 organization，切換下拉選單
+2. 確認 `current organization` 已更新
+3. 確認 Dashboard / Admin / Connectors 內容一起刷新
+4. 重新整理頁面
+5. 確認仍停留在新的 organization session
+
+八、Connector 真同步驗證
+1. 在 Connectors 頁點 `Connect Gmail` 或 `Connect Outlook`
+2. 完成 provider 授權
+3. 確認 connector card 顯示：
+   `auth=oauth2`
+4. 確認 `reconnect=false`
+5. 點 `Sync now`
+6. 確認沒有 `Provider token is missing` 錯誤
+7. 確認 Today Tasks 已刷新
+8. 確認 Briefing 已刷新
+9. 確認 Notifications 已新增訊息
+10. 確認 Admin 的 latest sync / jobs / schedules 有更新
+
+九、失敗時優先檢查
+1. redirect URI 是否完全一致
+2. provider client id / secret 是否正確
+3. PostgreSQL 是否可連線
+4. 是否已重新執行 `prisma generate`
+5. 是否已重新啟動 API
+6. 畫面是否仍顯示 `demo` mode
+7. `prisma db push` 若出現 `EPERM`，改在本機未受限 terminal 執行

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "jsx": "react-jsx",
+    "incremental": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "paths": {
+      "@app/*": [
+        "apps/*"
+      ],
+      "@packages/*": [
+        "packages/*"
+      ]
+    }
+  }
+}

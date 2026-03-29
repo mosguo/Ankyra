@@ -1,0 +1,66 @@
+Ankyra 第二階段待確認清單
+日期：2026-03-29
+對應文件：
+- Requestments_20260338.txt
+- 第二階段_核心資料與系統模型_20260329.txt
+
+一、核心實體與關聯
+- [x] 確認系統骨架主線為 Organization -> User -> AssistantInstance -> Conversation -> ConversationEvent
+- [x] 確認助理主線為 AssistantDefinition -> AssistantVersion -> AssistantInstance
+- [x] 確認記憶主線為 User -> Memory
+- [x] 確認治理主線為 Policy / ApprovalRecord / AuditLog / SecurityEvent
+
+二、使用者／租戶／身分模型
+- [x] 確認使用 users 作為內部使用者主體
+- [x] 確認使用 organizations 作為租戶主體
+- [x] 確認使用 memberships 管理 user 與 organization 關係
+- [x] 確認使用 oauth_identities 管理外部登入身分
+- [x] 確認使用 roles 與 user_role_assignments 管理角色
+
+三、助理／版本／實例模型
+- [x] 確認助理三層為 assistant_definition、assistant_version、assistant_instance
+- [x] 確認一個 assistant_definition 可視為一個二維度 SKU
+- [x] 確認 assistant_version 承載 prompt、model、memory、tool、output、approval、pricing 規則
+- [x] 確認 assistant_instance 承載使用者實際啟用狀態
+
+四、conversation／memory／tool／policy 模型
+- [x] 確認 conversation 採 conversations、conversation_events、conversation_summaries 三層
+- [x] 確認 memory 採 memories、memory_embeddings
+- [x] 確認 tool 採 tool_definitions、tool_connections、tool_policies、tool_invocation_logs
+- [x] 確認 policy 採 policies、policy_bindings、policy_decision_logs
+- [x] 確認所有執行過程以 conversation_event 為主線串接
+
+五、通知／排程／外部整合模型
+- [x] 確認外部連線主線為 connector_accounts、connector_tokens_ref、connector_sync_states
+- [x] 確認排程執行主線為 schedules、jobs
+- [x] 確認結果沉澱主線為 task_snapshots、briefing_snapshots
+- [x] 確認通知主線為 notification_channels、notification_preferences、notification_messages
+
+六、計費／方案／使用量模型
+- [x] 確認商業模型採方案、助理能力綁定、使用量追蹤
+- [x] 確認主要實體為 plans、plan_features、subscriptions、subscription_items、pricing_versions、usage_records、billing_cycles、invoice_records
+- [x] 確認訂閱主體可支援 user 與 organization
+- [x] 確認助理 instance 啟用與升級受訂閱與方案限制
+
+七、稽核／日誌／治理模型
+- [x] 確認 audit_logs 與 access_logs 分離
+- [x] 確認 policy_change_logs 管理政策變更
+- [x] 確認 approval_records 管理高風險審批
+- [x] 確認 security_events 管理異常與風險事件
+- [x] 確認 retention_rules 與 retention_actions 管理資料生命周期
+
+八、API 契約與資料邊界
+- [x] 確認介面邊界分為前端 API、內部服務 API、AI 執行邊界、外部整合邊界
+- [x] 確認 Entity、DTO、ViewModel、EventPayload、AIContextPayload 分離
+- [x] 確認 OpenAI 僅接收經整理、授權、裁切後的執行上下文
+- [x] 確認正式主資料保留於 Ankyra
+
+九、建議確認順序
+1. 核心實體與關聯
+2. 使用者／租戶／身分模型
+3. 助理／版本／實例模型
+4. conversation／memory／tool／policy 模型
+5. 通知／排程／外部整合模型
+6. 計費／方案／使用量模型
+7. 稽核／日誌／治理模型
+8. API 契約與資料邊界

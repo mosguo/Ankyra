@@ -1,0 +1,266 @@
+Ankyra 第一批後端模組與 Service 介面稿
+日期：2026-03-29
+
+一、目的
+本文件用於定義 MVP 第一批後端模組邊界、主要責任與建議 service 介面，方便後續進行後端實作與模組切分。
+
+二、第一批後端模組
+1. IdentityModule
+2. AssistantModule
+3. ConversationModule
+4. AICoreModule
+5. ConnectorModule
+6. SnapshotModule
+7. NotificationModule
+8. GovernanceModule
+9. BillingModule
+
+三、模組與責任
+1. IdentityModule
+責任：
+- OAuth2 登入
+- user / organization / membership 載入
+- current auth context
+- 租戶切換
+
+建議 service：
+- AuthService
+- UserService
+- OrganizationService
+- MembershipService
+
+建議介面：
+- beginOAuthLogin(provider, redirectUri)
+- handleOAuthCallback(provider, code, state)
+- getCurrentAuthContext(sessionId)
+- switchOrganization(userId, organizationId)
+
+2. AssistantModule
+責任：
+- 助理目錄
+- assistant definition / version / instance
+- 助理申請、升級、停用
+
+建議 service：
+- AssistantCatalogService
+- AssistantInstanceService
+- AssistantApprovalService
+
+建議介面：
+- listVisibleAssistants(userId, organizationId, filters)
+- getAssistantDefinition(assistantDefinitionId)
+- createAssistantInstance(userId, organizationId, assistantDefinitionId, input)
+- upgradeAssistantInstance(assistantInstanceId, targetRef, operatorId)
+- suspendAssistantInstance(assistantInstanceId, operatorId)
+
+3. ConversationModule
+責任：
+- conversations
+- conversation events
+- summaries
+
+建議 service：
+- ConversationService
+- ConversationEventService
+- ConversationSummaryService
+
+建議介面：
+- createConversation(userId, assistantInstanceId, channel)
+- listConversations(userId, filters)
+- getConversation(conversationId, userId)
+- appendUserMessage(conversationId, content)
+- appendAssistantMessage(conversationId, content)
+- appendToolEvent(conversationId, toolPayload)
+- createConversationSummary(conversationId, summaryPayload)
+
+4. AICoreModule
+責任：
+- orchestration
+- prompt 載入
+- policy 套用
+- memory 召回
+- tool route
+
+建議 service：
+- AIRuntimeService
+- PromptService
+- PolicyRuntimeService
+- MemoryRuntimeService
+- ToolRuntimeService
+
+建議介面：
+- runAssistantTurn(conversationId, userMessageEventId)
+- buildAIContext(conversationId)
+- resolvePromptBundle(assistantVersionId)
+- evaluateRuntimePolicies(runtimeContext)
+- selectAvailableTools(runtimeContext)
+- writeDerivedArtifacts(runtimeResult)
+
+5. ConnectorModule
+責任：
+- connector 授權
+- 外部帳號狀態
+- provider adapter
+- 同步狀態
+
+建議 service：
+- ConnectorService
+- GmailConnectorService 或 OutlookConnectorService
+- ConnectorSyncService
+
+建議介面：
+- beginConnectorAuthorization(userId, provider)
+- handleConnectorCallback(provider, code, state)
+- listConnectorAccounts(userId, organizationId)
+- revokeConnector(connectorAccountId, operatorId)
+- syncConnector(connectorAccountId, syncTarget)
+
+6. SnapshotModule
+責任：
+- task snapshot
+- briefing snapshot
+- 每日整理結果
+
+建議 service：
+- TaskSnapshotService
+- BriefingSnapshotService
+
+建議介面：
+- generateTaskSnapshot(jobId, runtimeInput)
+- getTodayTaskSnapshot(userId, organizationId)
+- generateBriefingSnapshot(jobId, runtimeInput)
+- getTodayBriefingSnapshot(userId, organizationId)
+
+7. NotificationModule
+責任：
+- 通知偏好
+- 通知發送
+- provider sender
+
+建議 service：
+- NotificationPreferenceService
+- NotificationDispatchService
+- TelegramSenderService 或 LineSenderService
+
+建議介面：
+- listNotificationPreferences(userId)
+- updateNotificationPreference(preferenceId, input)
+- queueNotification(messageInput)
+- sendNotification(notificationMessageId)
+- listNotificationMessages(userId, filters)
+
+8. GovernanceModule
+責任：
+- approval
+- audit
+- policy 基本管理
+
+建議 service：
+- ApprovalService
+- AuditService
+- PolicyService
+
+建議介面：
+- createApprovalRequest(requestInput)
+- approveRequest(approvalRecordId, operatorId, comments)
+- rejectRequest(approvalRecordId, operatorId, reason)
+- writeAuditLog(auditInput)
+- listAuditLogs(filters)
+- getEffectivePolicies(targetContext)
+
+9. BillingModule
+責任：
+- plans
+- subscriptions
+- usage records
+
+建議 service：
+- PlanService
+- SubscriptionService
+- UsageService
+
+建議介面：
+- listPlans(scope)
+- getActiveSubscription(subscriberType, subscriberId)
+- validateAssistantEligibility(subscriptionId, assistantDefinitionId)
+- recordUsage(usageInput)
+
+四、建議模組依賴方向
+1. IdentityModule
+- 基本獨立
+
+2. AssistantModule
+- 依賴 IdentityModule
+- 可呼叫 GovernanceModule 進行審批判定
+
+3. ConversationModule
+- 依賴 AssistantModule
+
+4. AICoreModule
+- 依賴 ConversationModule
+- 依賴 AssistantModule
+- 依賴 GovernanceModule
+- 依賴 ConnectorModule
+- 依賴 SnapshotModule
+
+5. ConnectorModule
+- 依賴 IdentityModule
+
+6. SnapshotModule
+- 依賴 ConversationModule
+- 依賴 AICoreModule 產出結果
+
+7. NotificationModule
+- 依賴 SnapshotModule
+- 依賴 GovernanceModule
+
+8. GovernanceModule
+- 儘量保持共用底層服務角色
+
+9. BillingModule
+- 依賴 IdentityModule
+- 供 AssistantModule 與 AICoreModule 進行 eligibility / usage 檢查
+
+五、MVP 優先實作的 Service
+第一優先：
+- AuthService
+- AssistantCatalogService
+- AssistantInstanceService
+- ConversationService
+- AIRuntimeService
+- ConnectorService
+- ConnectorSyncService
+- TaskSnapshotService
+- BriefingSnapshotService
+- NotificationDispatchService
+
+第二優先：
+- ApprovalService
+- AuditService
+- SubscriptionService
+- UsageService
+
+六、建議共用型別
+- AuthContext
+- AssistantRuntimeProfile
+- ConversationRuntimeContext
+- MemoryCandidate
+- ToolExecutionRequest
+- ToolExecutionResult
+- PolicyDecision
+- SnapshotPayload
+- NotificationPayload
+- ApprovalRequestInput
+- AuditLogInput
+
+七、建議實作原則
+1. service 先以 use-case 為中心，不要直接把資料表操作暴露給 controller
+2. orchestration 與 provider adapter 分開
+3. prompt、policy、tool、memory 組裝集中在 ai-core
+4. audit 與 approval 不要散落在各模組內隨意實作
+5. connector provider 以 interface 包裝，方便日後擴充 Gmail / Outlook / WeChat 等差異
+
+八、建議下一步
+- 將各 service 轉成 interface 草稿
+- 定義 DTO / command / query 類型
+- 開始建立 API controller 與 application service 對應表

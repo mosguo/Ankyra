@@ -1,0 +1,171 @@
+Ankyra 實作規劃
+日期：2026-03-29
+
+一、實作規劃目標
+本文件用於將前五階段的需求與架構，轉換為可開始實作的 MVP 工作計畫。
+
+二、MVP 範圍
+1. 帳號與登入
+- OAuth2 登入
+- Google / Microsoft / WeChat / Twitter provider 架構
+- user / organization / membership 基礎建立
+
+2. 助理基礎
+- 助理目錄
+- 助理申請
+- 助理 instance 建立
+- 助理版本載入
+
+3. 對話與 AI 核心
+- conversation 建立
+- conversation event ledger
+- OpenAI orchestration 基礎流程
+- summary 寫入
+
+4. 外部整合
+- Gmail 或 Outlook 二選一
+- 郵件整理
+- 今日待辦抽取
+
+5. 產出與通知
+- task snapshot
+- briefing snapshot
+- LINE 或 Telegram 二選一通知
+
+6. 管理與治理
+- 租戶管理基本頁
+- 審批基本流程
+- audit log 基本紀錄
+
+三、第一批資料表清單
+1. users
+2. organizations
+3. memberships
+4. oauth_identities
+5. assistant_definitions
+6. assistant_versions
+7. assistant_instances
+8. conversations
+9. conversation_events
+10. conversation_summaries
+11. memories
+12. tool_connections
+13. tool_policies
+14. connector_accounts
+15. connector_sync_states
+16. schedules
+17. jobs
+18. task_snapshots
+19. briefing_snapshots
+20. notification_channels
+21. notification_preferences
+22. notification_messages
+23. policies
+24. approval_records
+25. audit_logs
+26. plans
+27. subscriptions
+28. usage_records
+
+四、第一批 API 清單
+1. Auth API
+- POST /auth/oauth/login
+- GET /auth/me
+- POST /auth/switch-organization
+
+2. Assistant API
+- GET /assistants/catalog
+- GET /assistants/catalog/{id}
+- POST /assistant-instances
+- POST /assistant-instances/{id}/upgrade
+- POST /assistant-instances/{id}/suspend
+
+3. Conversation API
+- GET /conversations
+- POST /conversations
+- GET /conversations/{id}
+- POST /conversations/{id}/messages
+
+4. Memory / Snapshot API
+- GET /memories
+- GET /task-snapshots/today
+- GET /briefing-snapshots/today
+
+5. Connector API
+- GET /connectors
+- POST /connectors/{provider}/authorize
+- POST /connectors/{provider}/callback
+- DELETE /connectors/{id}
+
+6. Notification API
+- GET /notification-preferences
+- PUT /notification-preferences/{id}
+- GET /notification-messages
+
+7. Approval / Audit API
+- GET /approvals
+- POST /approvals/{id}/approve
+- POST /approvals/{id}/reject
+- GET /audit-logs
+
+五、第一批 repo 目錄建議
+- docs/
+- docs/requirements/
+- docs/plans/
+- docs/architecture/
+- apps/web/
+- apps/api/
+- packages/domain/
+- packages/application/
+- packages/infrastructure/
+- packages/ai-core/
+- packages/connectors/
+- packages/shared/
+- infra/
+
+六、第一批模組拆分
+1. 身分與租戶模組
+2. 助理目錄與 instance 模組
+3. conversation / memory 模組
+4. AI orchestration 模組
+5. connector 模組
+6. snapshot 與 notification 模組
+7. approval / audit 模組
+
+七、第一批開發順序
+第 1 波
+- users / organizations / memberships / oauth_identities
+- assistant_definitions / assistant_versions / assistant_instances
+- conversations / conversation_events
+
+第 2 波
+- OpenAI orchestration
+- summaries / memories
+- policies / tool_policies
+
+第 3 波
+- connector_accounts / connector_sync_states
+- jobs / task_snapshots / briefing_snapshots
+- notification_preferences / notification_messages
+
+第 4 波
+- approvals / audit_logs
+- plans / subscriptions / usage_records
+- 基本管理後台
+
+八、建議人力分工
+- Tech Lead / Architect：1
+- Backend：2
+- Frontend：1
+- AI / LLM：1
+- QA：1
+- Product / PM：1
+
+九、第一批驗收標準
+- 使用者可登入並進入租戶
+- 使用者可申請助理
+- 使用者可與助理建立對話
+- 系統可整理信箱並產出今日待辦
+- 系統可產出晨會摘要
+- 系統可經由通知通路發送摘要
+- 管理者可查看基本 audit 與審批紀錄

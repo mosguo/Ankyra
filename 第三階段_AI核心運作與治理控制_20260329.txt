@@ -1,0 +1,226 @@
+Ankyra 第三階段工作分析
+主階段名稱：AI 核心運作與治理控制
+日期：2026-03-29
+
+一、第三階段目的
+第三階段的目標，是把第二階段已建立的資料模型轉成真正可執行、可受控、可驗證、可持續優化的 AI 核心運作機制。
+
+這一階段要回答的不是「有沒有接模型」，而是：
+- AI 執行時如何組裝上下文
+- 哪些資料能被讀取與寫入
+- 哪些工具可被呼叫
+- 哪些行為需受 policy 限制
+- 如何做模擬、驗證、監控、回歸與調整
+
+二、第三階段九組主題
+1. AI orchestration 核心流程
+2. Prompt 與模型治理
+3. Conversation 運行控制
+4. Memory 控制
+5. Tool calling 控制
+6. Policy 執行引擎
+7. AI 模擬與驗證
+8. AI 分析與調整
+9. AI 監控與異常處理
+
+三、第三階段重點摘要
+1. AI orchestration 核心流程
+說明：
+定義一次 AI 任務從進來到回寫完成的完整執行鏈。
+
+重點內容：
+- 執行入口定義
+- assistant version 載入
+- context 組裝
+- memory 召回
+- policy 套用
+- tool 可用性判斷
+- 模型請求建立
+- 回應解析
+- tool 循環與二次回應
+- 事件回寫與結果沉澱
+
+目標：
+建立可追溯、可重放、可受控的 AI 主流程。
+
+2. Prompt 與模型治理
+說明：
+定義 prompt 版本、模型選型、白名單與助理對應規則。
+
+重點內容：
+- system prompt 管理
+- developer prompt 管理
+- prompt 版本控管
+- model policy
+- 模型白名單
+- 助理等級對應模型規則
+- 成本與能力平衡規則
+
+目標：
+讓 prompt 與模型變更可追溯、可測試、可比較。
+
+3. Conversation 運行控制
+說明：
+定義 conversation 在 OpenAI 與 Ankyra 內部的運行策略。
+
+重點內容：
+- previous_response_id 使用規則
+- OpenAI conversation object 使用規則
+- summary 注入規則
+- 長上下文壓縮
+- 歷史回放邏輯
+- version 切換交接規則
+
+目標：
+讓長對話可以穩定、低成本、可長期運作。
+
+4. Memory 控制
+說明：
+定義 memory 如何寫入、召回、更新、淘汰與治理。
+
+重點內容：
+- memory 寫入條件
+- memory 召回條件
+- memory 分類與權重
+- memory 合併與作廢
+- memory 有效期
+- 高敏感記憶處理
+- 記憶品質評估
+
+目標：
+讓記憶真正提升助理效果，而不是造成污染與失控。
+
+5. Tool calling 控制
+說明：
+定義 AI 如何選擇工具、驗證工具、處理工具錯誤與回灌結果。
+
+重點內容：
+- tool 選擇策略
+- tool 權限驗證
+- tool timeout
+- tool retry
+- tool 結果標準化
+- tool failure fallback
+- tool 結果寫回 conversation 與 audit
+
+目標：
+讓工具使用安全、穩定、可追蹤。
+
+6. Policy 執行引擎
+說明：
+定義 AI 在每一步驟中，如何依政策決定能做或不能做什麼。
+
+重點內容：
+- 可用資料判定
+- 可用工具判定
+- 可輸出內容判定
+- 需審批情境判定
+- 高風險行為阻擋
+- 降級處理規則
+- 政策決策記錄
+
+目標：
+讓 AI 遵守業務規則、權限規則與風險邊界。
+
+7. AI 模擬與驗證
+說明：
+建立可重跑、可比較、可回歸的 AI 驗證機制。
+
+重點內容：
+- 標準測試場景
+- 郵件摘要樣本
+- 待辦抽取樣本
+- 晨會摘要樣本
+- prompt regression
+- tool 模擬測試
+- 高風險案例測試
+- 升級前後比較
+
+目標：
+讓 AI 改版後可驗證品質是否提升或退化。
+
+8. AI 分析與調整
+說明：
+定義 AI 的品質、效果、採納率與成本分析方式。
+
+重點內容：
+- 摘要正確率
+- 待辦命中率
+- 記憶命中率
+- 使用者採納率
+- 模型成本趨勢
+- 工具成功率
+- 助理升級率
+- 通知成效關聯
+
+目標：
+讓 AI 調整有數據依據，而不是只靠主觀感覺。
+
+9. AI 監控與異常處理
+說明：
+定義 AI 運行過程中的監控指標、異常偵測與處理流程。
+
+重點內容：
+- latency
+- error rate
+- token 使用量
+- 成本異常
+- policy violation
+- tool failure
+- queue backlog
+- degraded mode
+- incident escalation
+
+目標：
+讓 AI 在正式運行時可被監控、告警與快速止血。
+
+四、第三階段前後順序
+建議依以下順序處理：
+1. AI orchestration 核心流程
+2. Prompt 與模型治理
+3. Conversation 運行控制
+4. Memory 控制
+5. Tool calling 控制
+6. Policy 執行引擎
+7. AI 模擬與驗證
+8. AI 分析與調整
+9. AI 監控與異常處理
+
+五、第三階段相依關係
+- orchestration 是主流程，其他各組都會嵌入其中
+- prompt 與模型治理會影響 orchestration 的請求組裝
+- conversation 控制會影響上下文成本與長期持續性
+- memory 控制會影響召回品質與摘要品質
+- tool calling 控制會影響外部整合安全性與可靠性
+- policy 引擎是整個執行過程的限制層
+- 模擬與驗證依賴前六組定義完成後才有標準
+- 分析與調整依賴驗證與正式運行數據
+- 監控與異常處理需覆蓋前面所有執行節點
+
+六、第三階段執行主線
+建議的 AI 執行主線如下：
+- 收到任務
+- 載入 assistant instance 與 assistant version
+- 載入 user / organization / policy / tool / memory 上下文
+- 組裝 AIContextPayload
+- 判斷可用工具與可用資料
+- 呼叫 OpenAI
+- 如需 tool calling 則進入工具循環
+- 產出 assistant response
+- 寫入 conversation event
+- 視需要寫入 memory、summary、task snapshot、briefing snapshot、notification
+- 更新 audit / usage / monitoring
+
+七、第三階段完成判準
+若要判定第三階段完成，至少需完成以下事項：
+- 已定義 orchestration 主流程
+- 已定義 prompt 與模型治理規則
+- 已定義 conversation / memory / tool / policy 的執行控制
+- 已定義 AI 模擬、驗證與回歸機制
+- 已定義 AI 分析與監控指標
+- 已定義異常處理與降級策略
+
+八、第三階段建議下一步
+- 建立第三階段待確認清單
+- 逐組確認第三階段 9 組主題
+- 優先從 AI orchestration 核心流程開始進入正式確認

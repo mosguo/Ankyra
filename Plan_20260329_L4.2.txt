@@ -1,0 +1,159 @@
+Ankyra 計畫紀錄
+計畫日期：2026-03-29
+本次最高等級：Level4.2
+檔名規則：Plan_YYYYMMDD_<最高Level>.txt
+
+一、範圍
+- 建立初版需求分析文件
+- 建立 Level 分級追蹤規則
+- 建立後續可持續沿用的計畫追蹤格式
+- 完成第一階段五組主題的逐項展開
+- 建立第一階段正式討論稿與待確認清單基礎
+- 完成第二階段八組主題的逐項展開
+- 建立第二階段正式討論稿與待確認清單
+- 開啟第三階段主清單
+- 完成第三階段九組主題的整體展開
+- 建立第三階段待確認清單
+- 開啟第四階段主清單
+- 建立第四階段待確認清單
+- 開啟第五階段主清單
+- 建立第五階段待確認清單
+
+二、依 Level 分組清單
+
+Level2
+- [x] 建立初版需求分析文件
+- [x] 將需求分析文件放入專案目錄，作為後續 repository 追蹤基礎
+
+Level4.1
+- [x] 定義以 Level 分類工作的追蹤方式
+- [x] 定義 Plan 檔名需包含日期與最高 Level 代號
+- [x] 將第一階段整理成五組主題
+
+Level4.2
+- [x] 將追蹤規則正式寫入需求分析文件
+- [x] 依命名規則建立第一份計畫追蹤檔
+- [x] 展開第一階段五組內容：
+  - 產品定位與目標客群
+  - 使用者、角色與治理邊界
+  - 助理商品化與二維度規則
+  - AI 治理原則與管理責任
+  - 文件、審查與需求變更規則
+- [x] 將第一階段重點濃縮回寫到需求文件
+- [x] 建立第一階段待確認清單
+- [x] 展開第二階段八組內容
+- [x] 將第二階段重點濃縮回寫到需求文件與第二階段文件
+- [x] 建立第二階段待確認清單
+- [x] 建立第三階段「AI 核心運作與治理控制」主清單
+- [x] 展開第三階段九組內容
+- [x] 將第三階段重點濃縮回寫到需求文件與第三階段文件
+- [x] 建立第三階段待確認清單
+- [x] 展開第四階段十組主題
+- [x] 將第四階段重點濃縮回寫到需求文件與第四階段文件
+- [x] 建立第四階段待確認清單
+- [x] 展開第五階段十組主題
+- [x] 將第五階段重點濃縮回寫到需求文件與第五階段文件
+- [x] 建立第五階段待確認清單
+
+三、完成摘要
+- 已完成等級：Level2、Level4.1、Level4.2
+- 已完成最高等級：Level4.2
+
+四、備註
+- 目前工作區已建立需求、階段分析與計畫文件，但因當前執行環境找不到 git，所以尚未完成 git init
+- 後續每次完成新的工作清單時，應持續沿用相同命名規則保存 Plan 檔
+- 中文文件已作為正式規則
+
+五、下一步建議
+- 待 git 可用後，初始化 repository
+- 逐條確認第一階段待確認清單
+- 已確認第 1 組「產品定位與目標客群」
+- 已確認第 2 組「使用者、角色與治理邊界」
+- 已確認第 3 組「助理商品化與二維度規則」
+- 已確認第 4 組「AI 治理原則與管理責任」
+- 已確認第 5 組「文件、審查與需求變更規則」
+- 第一階段五組主題已全數確認完成
+- 第二階段八組主題已展開，待逐組確認
+- 已確認第二階段第 1 組「核心實體與關聯」
+- 已確認第二階段第 2 組「使用者／租戶／身分模型」
+- 已確認第二階段第 3 組「助理／版本／實例模型」
+- 已確認第二階段第 4 組「conversation／memory／tool／policy 模型」
+- 已確認第二階段第 5 組「通知／排程／外部整合模型」
+- 已確認第二階段第 6 組「計費／方案／使用量模型」
+- 已確認第二階段第 7 組「稽核／日誌／治理模型」
+- 已確認第二階段第 8 組「API 契約與資料邊界」
+- 第二階段八組主題已全數確認完成
+- 第三階段九組主題已展開，待逐組確認
+- 第三階段九組主題已整體確認完成
+- 第四階段十組主題已展開，待逐組確認
+- 已確認第四階段第 1 組「使用者登入與帳號進入流程」
+- 已補充第四階段第 1 組 OAuth provider 需求：Google、Microsoft、WeChat、Twitter，且需可擴充
+- 已確認第四階段第 2 組「助理申請、開通、升級與停用流程」
+- 已確認第四階段第 3 組「Conversation 與助理互動介面」
+- 已確認第四階段第 4 組「Memory、待辦與摘要檢視介面」
+- 已確認第四階段第 5 組「外部帳號授權與連結介面」
+- 已確認第四階段第 6 組「外部資料整合流程與呈現」
+- 已確認第四階段第 7 組「通知通路設定與發送流程」
+- 已確認第四階段第 8 組「管理後台與租戶管理介面」
+- 已確認第四階段第 9 組「審批、稽核與治理操作介面」
+- 已確認第四階段第 10 組「使用者方案、訂閱與計費介面」
+- 第四階段十組主題已全數確認完成
+- 第五階段十組主題已展開，待逐組確認
+- 已確認第五階段第 1 組「營運指標與分析體系」
+- 已確認第五階段第 2 組「AI 成效分析與模型優化」
+- 已確認第五階段第 3 組「營運後台報表與觀測介面」
+- 已確認第五階段第 4 組「監控、告警與異常處理」
+- 已確認第五階段第 5 組「測試、驗收與上線前放行」
+- 已確認第五階段第 6 組「部署、環境與 CI/CD」
+- 已確認第五階段第 7 組「資料保護、備份與復原」
+- 已確認第五階段第 8 組「效能、擴充與可靠性」
+- 已確認第五階段第 9 組「資安、合規與正式治理」
+- 已確認第五階段第 10 組「持續優化與版本演進」
+- 第五階段十組主題已全數確認完成
+- 已建立總架構藍圖總結文件
+- 已建立 MVP 實作規劃文件
+- 已建立第一批開發任務拆單文件
+- 已建立第一批資料表 ERD 草案文件
+- 已建立第一批 API 詳細規格文件
+- 已建立 repo 目錄初始化清單與檔案骨架文件
+- 已建立第一批 migration 設計草案文件
+- 已建立第一批 API JSON 範例文件
+- 已建立第一批 SQL migration 草稿文件
+- 已建立第一批 OpenAPI 規格稿文件
+- 已建立第一批 Seed Data 草稿文件
+- 已建立第一批後端模組與 Service 介面稿文件
+- 已建立第一批 Controller / Route 對應表文件
+- 已建立第一批 DTO / Command / Query 草稿文件
+- 已建立第一批 Application Service Interface 稿文件
+- 已建立第一批 Repository Interface 稿文件
+- 已建立前端頁面 Sitemap 與畫面骨架文件
+- 已建立第一批程式碼骨架檔案清單文件
+- 已建立 Backend Framework 建議與落地方式文件
+- 已建立第一批 Developer Checklist 文件
+- 完成第一階段確認後，進入第二階段「核心資料與系統模型」
+2026-03-29 實作補充
+- [x] 建立 PrismaModule 與 PrismaService
+- [x] AppModule 接入 PrismaModule
+- [x] 補齊 User / AssistantDefinition / AssistantInstance / Conversation repository Prisma 底座
+- [x] 將 AuthService / AssistantCatalogService / AssistantInstanceService / ConversationService / AIRuntimeService 改為 Nest Injectable
+- [x] 將 Auth / Assistant / Conversation 主線 controller 補上 Nest decorators 與基本路由
+- [x] 將 IdentityModule / AssistantsModule / ConversationsModule 補上 repository providers
+- [x] 建立 Ankyra 目前進度總表
+
+目前狀態
+- Auth -> Assistant Catalog / Instance -> Conversation 已從純文件骨架進到 NestJS + Prisma 結構底座
+- 尚未安裝依賴、尚未執行 prisma generate、尚未驗證 compile
+- 下一步建議：補 Prisma schema 其餘模型、接 conversation event 寫入、實作真正的 OAuth callback 與 assistant catalog 查詢
+2026-03-29 主線強化補充
+- [x] 補 Prisma schema 之通知 / 訂閱 / 政策 / 審批模型
+- [x] 補 conversation event repository 與 event 寫入流程
+- [x] 補 assistant catalog 版本與能力輸出欄位
+- [x] 建立 apps/web 前端主畫面骨架
+- [x] 補 React / Vite 依賴
+- [x] 完成 build:web 驗證
+- [x] 前端串接 Auth Context / Assistant Catalog / Assistant Instances / Conversations API
+- [x] 建立 snapshots API 並接入 dashboard / tasks / briefing
+- [x] 再次驗證 build:api 與 build:web
+- [x] 建立 connector list / authorize / revoke API
+- [x] 前端 Connectors 頁串接真 API
+- [x] 再次驗證 build:api 與 build:web
