@@ -1,0 +1,941 @@
+# Ankyra 重建總規格
+
+版本日期：2026-03-30
+文件用途：本文件作為 Ankyra 專案的單一重建規格書。目標是讓 Codex 或其他工程團隊在「另開新專案」的情況下，只依本文件即可一步步重新建構 Ankyra。
+
+重要前提：
+1. 本文件同時描述：
+   - 本專案目前已完成的功能與設計
+   - 本專案目前所使用的工具與技術
+   - 重建時的目標架構
+2. 重建目標技術組合明確指定為：
+   - 前端：React
+   - 後端：Rust
+3. 本文件預設正式文件、畫面主要語言與需求文件皆以中文撰寫。
+
+
+==================================================
+一、產品定位
+==================================================
+
+產品名稱：Ankyra
+
+一句話定位：
+Ankyra 是一個面向知識工作者與管理者的多用戶 AI 工作助理平台，透過 OAuth2 身分登入、對話與記憶持久化、外部信箱與工具整合、工作快照與主動通知，協助使用者整理今日待辦、準備晨會、追蹤工作並保留長期工作脈絡。
+
+主要價值：
+1. 將使用者工作脈絡長期保存於自家系統
+2. 將對話、記憶、外部同步、通知串成工作閉環
+3. 將助理商品化，可申請、升級、定價、治理
+4. 先支援 demo fallback，不依賴外部服務也能展示
+
+主要目標客群：
+1. 主管
+2. 專案負責人
+3. 跨部門協調者
+4. 高知識密度工作者
+
+第一版主打場景：
+1. 郵件整理
+2. 今日待辦盤點
+3. 晨會摘要
+4. 同步後主動通知
+
+
+==================================================
+二、目前專案已完成的功能範圍
+==================================================
+
+以下為「目前現有 repo 中已經做出來的能力」，重建新專案時應完整保留。
+
+2.1 前端畫面
+1. Dashboard
+2. Assistant Catalog
+3. My Assistants
+4. Conversation
+5. Tasks
+6. Briefing
+7. Connectors
+8. Notifications
+9. Admin
+
+2.2 身分與登入
+1. OAuth provider 列表 API
+2. Google / Microsoft / WeChat / Twitter provider 概念設計
+3. Google / Microsoft 真 OAuth callback 主線骨架
+4. session persistence
+5. cookie + session_token 混合策略
+6. organization 切換
+7. logout
+
+2.3 助理系統
+1. 助理目錄
+2. 助理 instance 建立
+3. 助理 instance 升級 / suspend API 骨架
+4. 助理 version 概念
+5. 助理兩維度分類：
+   - 工作類型
+   - 能力等級
+
+2.4 對話系統
+1. conversation 建立
+2. conversation detail 查詢
+3. 發送訊息
+4. event timeline
+5. user_message / assistant_message event 寫入主線
+
+2.5 Snapshots
+1. 今日 task snapshot API
+2. 今日 briefing snapshot API
+3. sync 後回寫 snapshot
+
+2.6 Connectors
+1. connector account list
+2. authorize connector
+3. revoke connector
+4. sync connector
+5. Gmail / Outlook 真串接骨架
+6. demo fallback sync
+
+2.7 Notifications
+1. notification preferences list / update
+2. notification messages list
+3. sync 後自動產生 notification messages
+
+2.8 Jobs / Schedules / Queue
+1. schedule list / create
+2. run job
+3. queue dashboard
+4. retry job
+5. failed job requeue
+6. failed job bulk requeue
+7. queue pause / resume
+8. queue settings：
+   - concurrency
+   - rate limit per minute
+9. dead-letter queue
+10. job details drawer
+11. job relations：
+   - task snapshots
+   - briefing snapshots
+   - notification messages
+
+2.9 Health / Readiness / Admin
+1. health API
+2. readiness API
+3. scheduler status API
+4. admin summary
+5. queue metrics timeline
+6. chart / metric cards
+
+2.10 Demo fallback
+1. 當 API、DB、Redis、OAuth provider 無法使用時，前端仍可走本地 demo 資料
+2. demo 資料包含：
+   - auth context
+   - assistants
+   - conversations
+   - tasks
+   - briefing
+   - connectors
+   - notifications
+   - approvals
+   - audit logs
+   - jobs
+   - queue dashboard
+   - health / readiness
+
+2.11 多國語言
+1. English
+2. 繁體中文
+3. 簡體中文
+4. locale 切換後，UI 與 demo data 一起切換
+
+
+==================================================
+三、目前專案實際使用的工具與技術
+==================================================
+
+本節描述「現有 repo 實際採用」的技術，重建時用於參考與對照。
+
+3.1 前端現況
+1. React
+2. TypeScript
+3. Vite
+4. 單頁式應用（SPA）
+5. localStorage 保存：
+   - session token
+   - locale
+
+3.2 後端現況
+1. NestJS
+2. TypeScript
+3. Prisma
+4. PostgreSQL
+5. Redis
+6. BullMQ
+7. Worker 獨立進程
+
+3.3 其他現況
+1. OpenAPI 草稿
+2. SQL migration 草稿
+3. Seed data
+4. 多份需求與架構分析文件
+5. Demo 導覽順序與對外講稿
+
+注意：
+重建目標並不是把上述 NestJS/Prisma/BullMQ 原樣複製，而是保留功能與架構意圖，改成 React + Rust 版本。
+
+
+==================================================
+四、重建目標技術架構（目標版）
+==================================================
+
+本文件指定新的重建架構如下。
+
+4.1 前端
+1. React
+2. TypeScript
+3. Vite
+4. React Router
+5. i18n 由前端自己維護
+6. 與後端溝通採 REST API
+
+4.2 後端
+1. Rust
+2. 建議 Web framework：Axum
+3. 建議 async runtime：Tokio
+4. 建議序列化：Serde
+5. 建議 DB layer：SQLx
+6. 建議 PostgreSQL driver：sqlx-postgres
+7. 建議 Redis：redis-rs 或 fred
+8. 建議 queue/worker：
+   - 第一優先：自建 Redis queue + worker loop
+   - 或採現成 Rust queue 套件，但要保留 dead-letter / retry / pause-resume / metrics
+9. 建議 config：dotenvy + envy / config
+10. 建議 auth/session：
+   - Cookie + signed session token + DB session
+
+4.3 前後端部署形態
+1. React 獨立 dev server / build
+2. Rust API server
+3. Rust worker process
+4. PostgreSQL
+5. Redis
+
+4.4 基本原則
+1. 前端與後端分離
+2. 正式資料保存在自家 DB
+3. 外部 provider 只作為授權與資料來源
+4. conversation 不等於 memory
+5. tool / connector / policy / approval / audit 必須保留
+
+
+==================================================
+五、重建時必須保留的產品與系統原則
+==================================================
+
+5.1 助理模型
+助理採三層：
+1. assistant_definition
+2. assistant_version
+3. assistant_instance
+
+5.2 兩維度助理分類
+1. 工作類型
+2. 能力等級
+
+建議第一版工作類型：
+1. 郵件整理
+2. 今日待辦
+3. 晨會摘要
+4. 會議整理
+5. 專案追蹤
+
+能力等級：
+1. 初階
+2. 進階
+3. 專業
+
+5.3 conversation / memory 原則
+1. conversation 是事件流
+2. memory 是提煉後知識
+3. conversation 要可重建
+4. memory 要可淘汰、可更新、可查詢
+
+5.4 治理原則
+1. policy 獨立
+2. approval 獨立
+3. audit 獨立
+4. retention 獨立
+5. queue / worker 狀態可觀測
+
+5.5 多語與 demo 原則
+1. 主 UI 至少支援英 / 繁中 / 簡中
+2. demo 模式不依賴外部資源
+3. demo 模式應保留完整故事線
+
+
+==================================================
+六、建議的 Rust 後端模組切分
+==================================================
+
+重建後的 Rust backend 建議以模組化 crate / module 切分。
+
+6.1 identity
+職責：
+1. OAuth provider list
+2. OAuth begin
+3. OAuth callback
+4. get auth context
+5. switch organization
+6. logout
+7. session persistence
+
+6.2 assistants
+職責：
+1. list catalog
+2. get definition
+3. create instance
+4. upgrade instance
+5. suspend instance
+
+6.3 conversations
+職責：
+1. list conversations
+2. create conversation
+3. get conversation detail
+4. send message
+5. write events
+
+6.4 memories
+職責：
+1. list memories
+2. future memory recall/write hooks
+
+6.5 connectors
+職責：
+1. list connector accounts
+2. begin authorization
+3. provider callback
+4. revoke
+5. sync
+
+6.6 snapshots
+職責：
+1. get today tasks
+2. get today briefing
+3. sync 後建立/更新 snapshot
+
+6.7 notifications
+職責：
+1. list preferences
+2. update preferences
+3. list messages
+4. sync / job 後寫入 notification messages
+
+6.8 governance
+職責：
+1. approvals
+2. audit logs
+3. admin summary
+
+6.9 jobs
+職責：
+1. schedules
+2. jobs
+3. run job
+4. retry
+5. requeue failed
+6. queue pause / resume
+7. queue settings
+8. queue dashboard
+9. dead-letter
+10. scheduler status
+
+6.10 health
+職責：
+1. health
+2. readiness
+
+
+==================================================
+七、建議的 React 前端頁面結構
+==================================================
+
+7.1 頁面
+1. Dashboard
+2. Assistant Catalog
+3. My Assistants
+4. Conversation
+5. Tasks
+6. Briefing
+7. Connectors
+8. Notifications
+9. Admin
+
+7.2 核心前端狀態
+1. auth context
+2. locale
+3. assistant catalog
+4. assistant instances
+5. selected conversation
+6. connectors
+7. snapshots
+8. notifications
+9. jobs / schedules
+10. admin summary
+11. health / readiness
+
+7.3 必須保留的前端互動
+1. 登入 / 登出
+2. 已登入顯示用戶名稱
+3. 未登入隱藏用戶名稱
+4. organization 切換
+5. 建立 assistant instance
+6. 建立 conversation
+7. 發送訊息
+8. 建立 connector
+9. sync
+10. create schedule
+11. run job
+12. retry / requeue failed
+13. queue pause / resume
+14. queue settings update
+15. job details drawer
+16. locale switch
+
+
+==================================================
+八、重建後專案建議目錄結構
+==================================================
+
+建議新專案不是沿用 monorepo TypeScript 結構，而是明確分成三大應用。
+
+8.1 根目錄
+1. apps/
+2. crates/
+3. database/
+4. docs/
+5. scripts/
+
+8.2 前端
+apps/web/
+1. src/
+2. components/
+3. views/
+4. hooks/
+5. lib/
+6. i18n/
+7. styles/
+
+8.3 Rust API
+apps/api/
+1. Cargo.toml
+2. src/main.rs
+3. src/app.rs
+4. src/routes/
+5. src/handlers/
+6. src/state/
+7. src/middleware/
+
+8.4 Rust Worker
+apps/worker/
+1. Cargo.toml
+2. src/main.rs
+3. src/queue/
+4. src/jobs/
+5. src/metrics/
+
+8.5 共用 Rust crates
+crates/core/
+1. domain models
+2. DTOs
+3. errors
+4. config
+
+crates/db/
+1. SQLx repositories
+2. queries
+3. migrations helper
+
+crates/services/
+1. identity service
+2. assistant service
+3. conversation service
+4. connector service
+5. snapshot service
+6. notification service
+7. governance service
+8. job service
+
+8.6 database/
+1. migrations/
+2. seeds/
+
+
+==================================================
+九、資料表 / DB schema（重建時必須保留）
+==================================================
+
+以下是 MVP 必須保留的核心表。
+
+9.1 identity
+1. organizations
+2. users
+3. memberships
+4. oauth_identities
+5. user_sessions
+
+9.2 assistants
+1. assistant_definitions
+2. assistant_versions
+3. assistant_instances
+
+9.3 conversations
+1. conversations
+2. conversation_events
+3. conversation_summaries
+
+9.4 memories
+1. memories
+
+9.5 connectors
+1. connector_accounts
+2. connector_token_refs
+3. connector_sync_states
+
+9.6 snapshots
+1. task_snapshots
+2. briefing_snapshots
+
+9.7 notifications
+1. notification_channels
+2. notification_preferences
+3. notification_messages
+
+9.8 governance
+1. policies
+2. tool_policies
+3. approval_records
+4. audit_logs
+
+9.9 jobs / queue
+1. schedules
+2. jobs
+3. optional queue_metrics table
+4. optional dead_letter_jobs table
+
+9.10 billing（MVP 可保留輕量版）
+1. plans
+2. subscriptions
+3. usage_records
+
+
+==================================================
+十、API 規格（重建時必須保留）
+==================================================
+
+10.1 auth
+1. GET /api/auth/providers
+2. POST /api/auth/oauth/begin
+3. POST /api/auth/oauth/callback
+4. GET /api/auth/oauth/callback/:provider
+5. GET /api/auth/context
+6. POST /api/auth/switch-organization
+7. POST /api/auth/logout
+
+10.2 assistants
+1. GET /api/assistants/catalog
+2. GET /api/assistants/catalog/:assistant_definition_id
+3. GET /api/assistant-instances
+4. POST /api/assistant-instances
+5. PATCH /api/assistant-instances/:assistant_instance_id/upgrade
+6. PATCH /api/assistant-instances/:assistant_instance_id/suspend
+
+10.3 conversations
+1. GET /api/conversations
+2. POST /api/conversations
+3. GET /api/conversations/:conversation_id
+4. POST /api/conversations/:conversation_id/messages
+5. GET /api/memories
+
+10.4 connectors
+1. GET /api/connectors
+2. POST /api/connectors/authorize
+3. GET /api/connectors/oauth/callback/:provider
+4. POST /api/connectors/:connector_account_id/sync
+5. PATCH /api/connectors/:connector_account_id/revoke
+
+10.5 snapshots
+1. GET /api/snapshots/tasks/today
+2. GET /api/snapshots/briefing/today
+
+10.6 notifications
+1. GET /api/notifications/preferences
+2. PATCH /api/notifications/preferences
+3. GET /api/notifications/messages
+
+10.7 governance
+1. GET /api/governance/approvals
+2. PATCH /api/governance/approvals/approve
+3. PATCH /api/governance/approvals/reject
+4. GET /api/governance/audit-logs
+5. GET /api/governance/admin/summary
+
+10.8 jobs
+1. GET /api/jobs/scheduler-status
+2. GET /api/jobs/queue-dashboard
+3. GET /api/jobs/queue-settings
+4. POST /api/jobs/queue/pause
+5. POST /api/jobs/queue/resume
+6. POST /api/jobs/queue/settings
+7. GET /api/jobs/schedules
+8. POST /api/jobs/schedules
+9. GET /api/jobs
+10. GET /api/jobs/:job_id/relations
+11. GET /api/jobs/export.csv
+12. POST /api/jobs/run
+13. POST /api/jobs/:job_id/retry
+14. POST /api/jobs/:job_id/requeue-failed
+15. POST /api/jobs/requeue-failed-bulk
+
+10.9 health
+1. GET /api/health
+2. GET /api/ready
+
+
+==================================================
+十一、Google OAuth 實作要求
+==================================================
+
+重建時，Google OAuth 必須實作到可用狀態，而不是只保留 demo。
+
+11.1 provider begin
+1. 前端點擊 Google 登入
+2. POST /api/auth/oauth/begin
+3. 後端回傳 authorization_url
+4. 前端 redirect 到 Google
+
+11.2 callback
+1. Google redirect 回後端：
+   /api/auth/oauth/callback/google
+2. 後端交換 token
+3. 後端取得 userinfo
+4. 建立或綁定 user / oauth_identity / session
+5. 後端 redirect 回前端：
+   frontend_url?session_token=...
+
+11.3 前端登入狀態
+1. 有 session_token：
+   - 顯示用戶名稱
+   - 按鈕顯示登出
+2. 無 session_token：
+   - 不顯示用戶名稱
+   - 按鈕顯示登入
+
+11.4 建議本機 URI
+1. 前端：
+   http://127.0.0.1:4174/web
+2. 後端：
+   http://127.0.0.1:3000
+3. Google redirect URI：
+   http://127.0.0.1:3000/api/auth/oauth/callback/google
+
+
+==================================================
+十二、Connectors 與外部同步要求
+==================================================
+
+12.1 MVP provider
+1. Gmail
+2. Outlook Mail
+
+12.2 connector auth
+1. list connector accounts
+2. provider authorization
+3. callback
+4. save token ref
+5. save sync state
+
+12.3 sync 主線
+Sync 成功後必須依序產生：
+1. connector_sync_state 更新
+2. task_snapshot
+3. briefing_snapshot
+4. notification_messages
+5. job / audit 記錄
+
+12.4 demo fallback
+即使 provider token 或外部服務不可用，也必須保留 demo sync fallback。
+
+
+==================================================
+十三、Jobs / Queue / Worker 重建要求
+==================================================
+
+13.1 queue 核心能力
+1. enqueue
+2. process
+3. retry
+4. failed requeue
+5. bulk requeue
+6. pause / resume
+7. concurrency control
+8. rate limit control
+9. dead-letter
+10. queue dashboard
+
+13.2 schedule 核心能力
+1. create schedule
+2. list schedule
+3. due schedule polling
+4. due schedule -> enqueue job
+
+13.3 worker job types
+1. connector_sync
+2. future:
+   - snapshot_refresh
+   - notification_dispatch
+   - memory_compaction
+
+13.4 admin 顯示
+1. queue counts
+2. recent jobs
+3. dead-letter jobs
+4. timeline
+5. queue settings
+6. runtime metrics
+
+
+==================================================
+十四、多語系要求
+==================================================
+
+必須支援：
+1. English
+2. 繁體中文
+3. 簡體中文
+
+要求：
+1. UI 文案可切換
+2. demo data 內容也跟著切換
+3. 日期時間格式跟 locale 連動
+4. job / notification / approval / audit 的展示文案要多語化
+
+
+==================================================
+十五、Demo 模式要求
+==================================================
+
+重建時必須保留「純前端可展示」能力。
+
+15.1 觸發條件
+當 API / DB / Redis / OAuth / connector 無法使用時，前端能退回本地 demo mode。
+
+15.2 demo mode 範圍
+1. auth context
+2. assistant catalog
+3. assistant instances
+4. conversations
+5. tasks
+6. briefing
+7. connectors
+8. notifications
+9. approvals
+10. audit logs
+11. jobs
+12. queue dashboard
+13. health / readiness
+
+15.3 demo 內容風格
+要偏管理者 / 專案型知識工作者情境，不可只是技術測試資料。
+
+
+==================================================
+十六、實作順序（Codex 重建時請照這個順序）
+==================================================
+
+Phase 1：專案初始化
+1. 建新 repo
+2. 建 React 前端
+3. 建 Rust API
+4. 建 Rust worker
+5. 建 PostgreSQL / Redis
+6. 建 env / config
+
+Phase 2：資料層
+1. 建 migrations
+2. 建 seed
+3. 建 DB repositories
+4. 建 domain models
+
+Phase 3：Auth 與 Assistant 主線
+1. auth providers
+2. session persistence
+3. Google OAuth
+4. assistant catalog
+5. assistant instances
+
+Phase 4：Conversation 主線
+1. create conversation
+2. send message
+3. event timeline
+4. demo AI response
+
+Phase 5：Connectors / Snapshots / Notifications
+1. connector accounts
+2. authorize/revoke
+3. sync
+4. task snapshot
+5. briefing snapshot
+6. notification messages
+
+Phase 6：Jobs / Queue / Worker
+1. schedules
+2. jobs
+3. worker processing
+4. retry / DLQ
+5. dashboard data
+
+Phase 7：Admin / Health / Governance
+1. health
+2. readiness
+3. approvals
+4. audit logs
+5. admin summary
+
+Phase 8：多語與 demo fallback
+1. i18n
+2. localized demo data
+3. localized date/time
+4. localized business labels
+
+Phase 9：展示收尾
+1. dashboard wording
+2. job drawer relations
+3. queue charts
+4. demo walkthrough
+5. demo script
+
+
+==================================================
+十七、每一步的驗收條件
+==================================================
+
+17.1 auth 驗收
+1. Google 能登入
+2. 登入後看到用戶名稱
+3. 登出後恢復登入按鈕
+4. session 重整後仍存在
+
+17.2 assistant 驗收
+1. catalog 可列出
+2. 可建立 instance
+3. instance 能在前端顯示
+
+17.3 conversation 驗收
+1. 可建立對話
+2. 可送訊息
+3. timeline 可顯示事件
+
+17.4 connector 驗收
+1. 可建立 Gmail / Outlook connector
+2. 可 revoke
+3. 可 sync
+
+17.5 snapshot / notification 驗收
+1. sync 後 task snapshot 更新
+2. briefing snapshot 更新
+3. notification messages 增加
+
+17.6 jobs / queue 驗收
+1. 可 create schedule
+2. 可 run job
+3. 可 retry / requeue failed
+4. queue dashboard 有資料
+
+17.7 admin 驗收
+1. health / readiness 正常
+2. admin summary 有資料
+3. approvals / audit logs 可看
+
+17.8 demo 驗收
+1. 不啟 API 也能看 demo UI
+2. 三語切換正常
+3. demo data 跟著語系變化
+
+
+==================================================
+十八、Codex 執行規則（給未來另一個新專案）
+==================================================
+
+未來若由 Codex 在新 repo 依本文件重建，請遵守：
+
+1. 先建目錄與基礎腳手架，再建功能
+2. 每完成一條主線就先能 build
+3. 每階段都保留 demo fallback
+4. 不要先串所有外部 provider
+5. 先完成 Google，再擴展 Microsoft / Gmail / Outlook
+6. queue / worker 要優先可觀測
+7. 先做最小可運作，再做美化
+8. 每次完成後都更新：
+   - README
+   - env example
+   - seed
+   - 驗證清單
+
+
+==================================================
+十九、重建時建議使用的 Rust 套件
+==================================================
+
+建議：
+1. axum
+2. tokio
+3. serde
+4. serde_json
+5. sqlx
+6. uuid
+7. chrono
+8. dotenvy
+9. tracing
+10. tracing-subscriber
+11. reqwest
+12. tower
+13. cookie / axum-extra
+14. redis 或 fred
+
+可選：
+1. utoipa（OpenAPI）
+2. validator
+3. lettre（若後續需 email）
+
+
+==================================================
+二十、最終目標
+==================================================
+
+重建後的專案要達成：
+
+1. 使用 React 作為前端主畫面與管理面板
+2. 使用 Rust 作為後端 API 與 worker 核心
+3. 支援 Google OAuth 真登入
+4. 支援助理、對話、同步、快照、通知、排程、queue、admin
+5. 支援英 / 繁中 / 簡中
+6. 支援本地 demo fallback
+7. 能在沒有外部 provider 的情況下展示產品故事
+8. 能在有 PostgreSQL / Redis / Google OAuth 時跑通真實主線
+
+
+==================================================
+二十一、簡短結論
+==================================================
+
+本文件就是 Ankyra 的「單一重建規格書」。
+
+在新專案中，只要：
+1. 採用 React + Rust
+2. 依本文件的模組、資料表、API、實作順序與驗收條件
+3. 一步步完成
+
+即可重新建構出功能等價、架構方向一致、且更符合你最新技術選型要求的 Ankyra。
