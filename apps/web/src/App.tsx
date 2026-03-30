@@ -186,6 +186,11 @@ function App() {
     () => instances.find((item) => item.assistant_instance_id === selectedInstanceId) ?? null,
     [instances, selectedInstanceId],
   );
+  const isAuthenticated = Boolean(auth?.session_token);
+  const googleProvider = useMemo(
+    () => oauthProviders.find((provider) => provider.provider === "google") ?? null,
+    [oauthProviders],
+  );
   const isDemoFallback =
     healthStatus?.status?.includes("degraded") || readinessStatus?.status?.includes("degraded");
   const formatDateTime = (value?: string | number | null) => {
@@ -482,7 +487,7 @@ function App() {
     try {
       const begin = await api.beginOAuthLogin({
         provider: provider.provider,
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}${window.location.pathname}`,
       });
       if (begin.authorization_mode === "oauth2") {
         window.location.assign(begin.authorization_url);
@@ -745,7 +750,7 @@ function App() {
         user_id: auth.user_id,
         organization_id: auth.current_organization.organization_id,
         provider,
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}${window.location.pathname}`,
       });
       if (result.authorization_mode === "oauth2" && result.authorization_url) {
         window.location.assign(result.authorization_url);
@@ -1078,6 +1083,17 @@ function App() {
     }
   }
 
+  async function handlePrimaryAuthAction() {
+    if (isAuthenticated) {
+      await handleLogout();
+      return;
+    }
+
+    if (googleProvider) {
+      await handleOAuthLogin(googleProvider);
+    }
+  }
+
   async function handlePauseQueue() {
     if (!auth) return;
     setLoading(t.pauseQueue);
@@ -1139,17 +1155,19 @@ function App() {
           </div>
         </div>
 
-        <div className="org-card">
-          <div className="org-label">{t.organization}</div>
-          <div className="org-name">
-            {auth?.current_organization.organization_name ?? t.loading}
-          </div>
-          <div className="org-meta">
-            {auth?.display_name ?? t.demoUser} | {auth?.email ?? "demo.user@ankyra.local"}
-          </div>
-          <label className="toggle-line">
-            <span>{t.language}</span>
-            <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
+          <div className="org-card">
+            <div className="org-label">{t.organization}</div>
+            <div className="org-name">
+              {auth?.current_organization.organization_name ?? t.loading}
+            </div>
+            {isAuthenticated && (
+              <div className="org-meta">
+                {auth?.display_name ?? t.demoUser} | {auth?.email ?? "demo.user@ankyra.local"}
+              </div>
+            )}
+            <label className="toggle-line">
+              <span>{t.language}</span>
+              <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
               {localeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -1157,10 +1175,10 @@ function App() {
               ))}
             </select>
           </label>
-          {(auth?.organizations?.length ?? 0) > 1 && (
-            <select
-              value={auth?.current_organization.organization_id}
-              onChange={(event) => handleOrganizationSwitch(event.target.value)}
+            {isAuthenticated && (auth?.organizations?.length ?? 0) > 1 && (
+              <select
+                value={auth?.current_organization.organization_id}
+                onChange={(event) => handleOrganizationSwitch(event.target.value)}
             >
               {auth?.organizations?.map((organization) => (
                 <option
@@ -1171,14 +1189,16 @@ function App() {
                 </option>
               ))}
             </select>
-          )}
-          <div className="org-meta">
-            {t.session}: {auth?.session_token ? t.sessionPersisted : t.demoFallback}
+            )}
+            <div className="org-meta">
+              {t.session}: {auth?.session_token ? t.sessionPersisted : t.demoFallback}
+            </div>
+            <button className="secondary-btn" onClick={handlePrimaryAuthAction}>
+              {isAuthenticated
+                ? t.signOut
+                : `${t.signInWith} ${googleProvider?.display_name ?? "Google"}`}
+            </button>
           </div>
-          <button className="secondary-btn" onClick={handleLogout}>
-            {t.signOut}
-          </button>
-        </div>
 
         <nav className="nav">
           {localizedNavItems.map((item) => (
@@ -1248,19 +1268,27 @@ function App() {
                 <h2>{t.oauthProviders}</h2>
                 <span className="chip">{t.demoCallback}</span>
               </div>
-              <div className="stack-actions">
-                {oauthProviders.map((provider) => (
-                  <button
-                    key={provider.provider}
-                    className="secondary-btn"
-                    disabled={!provider.enabled}
-                    onClick={() => handleOAuthLogin(provider)}
-                  >
-                    {t.signInWith} {provider.display_name} ({provider.mode})
-                  </button>
-                ))}
-              </div>
-            </article>
+                <div className="stack-actions">
+                  {!isAuthenticated ? (
+                    oauthProviders
+                      .filter((provider) => provider.provider === "google")
+                      .map((provider) => (
+                        <button
+                          key={provider.provider}
+                          className="secondary-btn"
+                          disabled={!provider.enabled}
+                          onClick={() => handleOAuthLogin(provider)}
+                        >
+                          {t.signInWith} {provider.display_name}
+                        </button>
+                      ))
+                  ) : (
+                    <div className="status-inline">
+                      {auth?.display_name ?? t.demoUser}
+                    </div>
+                  )}
+                </div>
+              </article>
 
             <article className="panel">
               <div className="panel-title-row">
